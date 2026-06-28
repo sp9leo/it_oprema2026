@@ -1,0 +1,45 @@
+{
+ "app": "it_oprema2026",
+ "charts": [],
+ "content": "[{\"id\":\"CZ5SZu3PBY\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">Izposoje</span>\",\"col\":12}},{\"id\":\"ZS7hdE0oxT\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Device Loan\",\"col\":3}}]",
+ "creation": "2026-01-10 12:13:37.465697",
+ "custom_blocks": [],
+ "docstatus": 0,
+ "doctype": "Workspace",
+ "for_user": "",
+ "hide_custom": 0,
+ "icon": "grid",
+ "idx": 0,
+ "indicator_color": "green",
+ "is_hidden": 0,
+ "label": "Izposoje",
+ "link_type": "DocType",
+ "links": [],
+ "modified": "2026-01-21 17:29:20.892959",
+ "modified_by": "Administrator",
+ "module": "IT_Oprema",
+ "name": "reservations",
+ "number_cards": [],
+ "owner": "Administrator",
+ "parent_page": "System",
+ "public": 1,
+ "quick_lists": [],
+ "roles": [
+  {
+   "role": "System Manager"
+  }
+ ],
+ "sequence_id": 28.0,
+ "shortcuts": [
+  {
+   "color": "Grey",
+   "doc_view": "List",
+    "label": "Device Loan",
+    "link_to": "Device Loan",
+   "stats_filter": "[]",
+   "type": "DocType"
+  }
+ ],
+ "title": "Izposoje",
+ "type": "Workspace"
+}

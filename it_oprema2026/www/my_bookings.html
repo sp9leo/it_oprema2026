@@ -1,0 +1,81 @@
+{% extends "templates/reservations_web.html" %}
+
+{% block title %}Moje izposoje{% endblock %}
+
+{% block page_content %}
+<div class="container py-4">
+  <h1 class="mb-4">Moje izposoje</h1>
+
+  <form class="row g-2 mb-4" method="GET">
+    <div class="col-auto">
+      <input type="email" name="email" class="form-control" placeholder="Vpi\u0161ite e-po\u0161to" value="{{ email }}" required>
+    </div>
+    <div class="col-auto">
+      <button type="submit" class="btn btn-primary">Poi\u0161\u010di</button>
+    </div>
+  </form>
+
+  {% if loans %}
+  <div class="table-responsive">
+    <table class="table table-hover">
+      <thead>
+        <tr>
+          <th>Naprava</th>
+          <th>Koda</th>
+          <th>Od</th>
+          <th>Do</th>
+          <th>Status</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for l in loans %}
+        <tr>
+          <td>{{ l.device_name }}</td>
+          <td><code>{{ l.booking_ref }}</code></td>
+          <td>{{ l.from_date }}</td>
+          <td>{{ l.to_date }}</td>
+          <td>
+            {% if l.status == "Confirmed" %}<span class="badge bg-success">Potrjeno</span>
+            {% elif l.status == "Returned" %}<span class="badge bg-secondary">Vrnjeno</span>
+            {% elif l.status == "Cancelled" %}<span class="badge bg-danger">Preklicano</span>
+            {% else %}<span class="badge bg-warning">{{ l.status }}</span>{% endif %}
+          </td>
+          <td>
+            {% if l.status == "Confirmed" %}
+            <button class="btn btn-sm btn-outline-danger cancel-btn"
+                    data-token="{{ l.access_token }}">Prekli\u010di</button>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% elif email %}
+  <p class="text-muted">Ni najdenih izposoj za ta e-po\u0161tni naslov.</p>
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block page_script %}
+<script>
+  document.querySelectorAll('.cancel-btn').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      if (!confirm('Prekli\u010dem izposojo?')) return;
+      const token = btn.dataset.token;
+      const r = await fetch('/api/method/it_oprema2026.device_loan.api.cancel_loan', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({ access_token: token })
+      });
+      const data = await r.json();
+      if (data.message && data.message.ok) {
+        location.reload();
+      } else {
+        alert(data.message?.message || 'Napaka pri preklicu');
+      }
+    });
+  });
+</script>
+{% endblock %}

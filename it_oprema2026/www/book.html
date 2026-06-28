@@ -1,0 +1,174 @@
+{% extends "templates/reservations_web.html" %}
+
+{% block title %}Izposoja - {{ device.device_name }}{% endblock %}
+
+{% block page_content %}
+<style>
+  .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; max-width: 350px; }
+  .cal-day { text-align: center; padding: 6px 2px; font-size: .8rem; border-radius: 4px; }
+  .cal-day.header { font-weight: 600; color: #64748b; }
+  .cal-day.booked { background: #dc2626; color: #fff; border-radius: 4px; }
+  .cal-day.available { background: #fff; }
+  .cal-day.other-month { color: #cbd5e1; }
+  .cal-month { margin-bottom: 16px; }
+  .cal-month h6 { margin-bottom: 6px; }
+</style>
+<div class="container py-4">
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="/devices">Naprave</a></li>
+      <li class="breadcrumb-item active">{{ device.device_name }}</li>
+    </ol>
+  </nav>
+
+  <div class="row">
+    <div class="col-md-6">
+      <h2>{{ device.device_name }}</h2>
+      <p class="text-muted">{{ device.device_inventory_code }}</p>
+      <hr>
+
+      <form id="bookingForm">
+        <input type="hidden" name="device" value="{{ device.name }}">
+
+        <div class="mb-3">
+          <label class="form-label">Ime in priimek</label>
+          <input type="text" name="customer_name" class="form-control" required>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">E-po\u0161ta</label>
+          <input type="email" name="customer_email" class="form-control" required>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Datum od</label>
+          <input type="date" name="from_date" class="form-control" required
+                 min="{{ today }}">
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Datum do</label>
+          <input type="date" name="to_date" class="form-control" required
+                 min="{{ today }}">
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Namen (neobvezno)</label>
+          <textarea name="purpose" class="form-control" rows="2"></textarea>
+        </div>
+
+        <div id="availabilityMsg" class="mb-3"></div>
+
+        <button type="submit" class="btn btn-success" id="submitBtn" disabled>
+          Potrdi izposojo
+        </button>
+      </form>
+
+      <div id="resultMsg" class="mt-3"></div>
+    </div>
+
+    <div class="col-md-6">
+      <h5>Zasedeni datumi</h5>
+      <div id="calendar" class="border rounded p-3 bg-light"></div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block page_script %}
+<script>
+  const bookedDates = {{ booked_dates_json | safe }};
+  const deviceName = '{{ device.device_name }}';
+
+  function buildCalendar(container, year, month) {
+    const names = ['Jan','Feb','Mar','Apr','Maj','Jun','Jul','Avg','Sep','Okt','Nov','Dec'];
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const firstDow = new Date(year, month, 1).getDay();
+    const startOffset = firstDow === 0 ? 6 : firstDow - 1;
+
+    let html = `<div class="cal-month"><h6>${names[month]} ${year}</h6><div class="cal-grid">`;
+    ['Po','To','Sr','\u010ce','Pe','So','Ne'].forEach(d => {
+      html += `<div class="cal-day header">${d}</div>`;
+    });
+    for (let i = 0; i < startOffset; i++) {
+      html += '<div class="cal-day other-month"></div>';
+    }
+    for (let d = 1; d <= daysInMonth; d++) {
+      const dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+      const booked = bookedDates.includes(dateStr);
+      const cls = booked ? 'cal-day booked' : 'cal-day available';
+      html += `<div class="${cls}">${d}</div>`;
+    }
+    html += '</div></div>';
+    container.innerHTML += html;
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const cal = document.getElementById('calendar');
+    const now = new Date();
+    for (let m = 0; m < 3; m++) {
+      const d = new Date(now.getFullYear(), now.getMonth() + m, 1);
+      buildCalendar(cal, d.getFullYear(), d.getMonth());
+    }
+  });
+
+  const form = document.getElementById('bookingForm');
+  const fromInput = form.querySelector('[name=from_date]');
+  const toInput = form.querySelector('[name=to_date]');
+  const availMsg = document.getElementById('availabilityMsg');
+  const submitBtn = document.getElementById('submitBtn');
+
+  async function checkAvailability() {
+    const from = fromInput.value;
+    const to = toInput.value;
+    if (!from || !to) { availMsg.innerHTML = ''; submitBtn.disabled = true; return; }
+    if (from > to) { availMsg.innerHTML = '<div class="alert alert-warning">Za\u010detni datum je kasnej\u0161i od kon\u010dnega</div>'; submitBtn.disabled = true; return; }
+    const r = await fetch(`/api/method/it_oprema2026.device_loan.api.check_availability?device={{ device.name }}&from_date=${from}&to_date=${to}`);
+    const data = await r.json();
+    if (data.message.available) {
+      availMsg.innerHTML = '<div class="alert alert-success">Naprava je na voljo v izbranem obdobju</div>';
+      submitBtn.disabled = false;
+    } else {
+      availMsg.innerHTML = '<div class="alert alert-danger">Naprava v izbranem obdobju ni na voljo</div>';
+      submitBtn.disabled = true;
+    }
+  }
+
+  fromInput.addEventListener('change', checkAvailability);
+  toInput.addEventListener('change', checkAvailability);
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const fd = new FormData(form);
+    const params = new URLSearchParams(fd);
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Obdelujem...';
+    try {
+      const r = await fetch('/api/method/it_oprema2026.device_loan.api.create_loan', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: params
+      });
+      const data = await r.json();
+      if (data.message) {
+        document.getElementById('resultMsg').innerHTML =
+          `<div class="alert alert-success">
+            <strong>Izposoja potrjena!</strong><br>
+            Koda: <strong>${data.message.booking_ref}</strong><br>
+            <a href="/my_bookings?email=${encodeURIComponent(fd.get('customer_email'))}" class="alert-link">Upravljaj izposoje</a>
+          </div>`;
+        form.reset();
+      } else if (data.exc) {
+        document.getElementById('resultMsg').innerHTML =
+          `<div class="alert alert-danger">Napaka: ${data.exc}</div>`;
+      }
+    } catch (err) {
+      document.getElementById('resultMsg').innerHTML =
+        `<div class="alert alert-danger">Napaka pri po\u0161iljanju</div>`;
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Potrdi izposojo';
+    }
+  });
+</script>
+{% endblock %}

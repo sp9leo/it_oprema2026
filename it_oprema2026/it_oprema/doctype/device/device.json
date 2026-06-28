@@ -1,0 +1,357 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "DEV.###",
+ "creation": "2023-10-17 14:13:16.608421",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "device_inventory_code",
+  "device_id",
+  "is_computer",
+  "computer_link",
+  "column_break_xvhb",
+  "device_name",
+  "device_manufacturer",
+  "device_manufacturer_model",
+  "device_serial",
+  "column_break_ypaf",
+   "device_group",
+   "is_bookable",
+   "status",
+   "location",
+   "company",
+  "section_break_mord",
+  "column_break_enpj",
+  "attached_ips_html",
+  "section_break_ntrf",
+  "column_break_hmxm",
+  "velikost",
+  "vhodi_column",
+  "vga",
+  "hdmi",
+  "dp",
+  "usb",
+  "zvo\u010dniki",
+  "column_break_mywh",
+  "opombe",
+  "section_break_bvyj",
+  "koda",
+  "column_break_hdtj",
+  "device_admin",
+  "device_user",
+  "tab_5_tab",
+  "movements_html",
+  "tab_2_tab",
+  "attach_qsif",
+  "column_break_wuik",
+  "bookings_tab",
+  "bookings_html"
+ ],
+ "fields": [
+  {
+   "fieldname": "device_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Ime"
+  },
+  {
+   "fieldname": "device_admin",
+   "fieldtype": "Link",
+   "label": "Skrbnik",
+   "options": "User"
+  },
+  {
+   "fieldname": "device_user",
+   "fieldtype": "Link",
+   "label": "Uporabnik",
+   "options": "User"
+  },
+  {
+   "fieldname": "device_group",
+   "fieldtype": "Link",
+   "label": "Skupina",
+   "options": "Device Group",
+   "reqd": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "is_bookable",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Mo\u017ena izposoja"
+  },
+  {
+   "fieldname": "device_serial",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Serijska \u0161t."
+  },
+  {
+   "description": "Interna \u0161tevilka naprave",
+   "fieldname": "device_id",
+   "fieldtype": "Data",
+   "in_filter": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Interna \u0161t.",
+   "unique": 1
+  },
+  {
+   "bold": 1,
+   "description": "Inventarna \u0161tevilka naprave",
+   "fieldname": "device_inventory_code",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "in_standard_filter": 1,
+   "label": "Inventarna \u0161t.",
+   "non_negative": 1,
+   "reqd": 1
+  },
+  {
+   "fetch_from": "device.device_inventory_code",
+   "fieldname": "koda",
+   "fieldtype": "Barcode",
+   "label": "koda"
+  },
+  {
+   "fieldname": "column_break_ypaf",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_mord",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_enpj",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_bvyj",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_hdtj",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "tab_2_tab",
+   "fieldtype": "Tab Break",
+   "label": "Tab 2"
+  },
+  {
+   "fieldname": "attach_qsif",
+   "fieldtype": "Attach"
+  },
+  {
+   "fieldname": "column_break_wuik",
+   "fieldtype": "Column Break",
+   "label": "Attached files"
+  },
+  {
+   "fieldname": "column_break_hmxm",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "velikost",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Velikost"
+  },
+  {
+   "fieldname": "vhodi_column",
+   "fieldtype": "Column Break",
+   "label": "Vhodi"
+  },
+  {
+   "default": "0",
+   "fieldname": "vga",
+   "fieldtype": "Check",
+   "label": "VGA"
+  },
+  {
+   "default": "0",
+   "fieldname": "hdmi",
+   "fieldtype": "Check",
+   "label": "HDMI"
+  },
+  {
+   "default": "0",
+   "fieldname": "dp",
+   "fieldtype": "Check",
+   "label": "DP"
+  },
+  {
+   "default": "0",
+   "fieldname": "usb",
+   "fieldtype": "Check",
+   "label": "USB"
+  },
+  {
+   "collapsible": 1,
+   "collapsible_depends_on": "eval: doc.device_group == \"Monitor\"",
+   "fieldname": "section_break_ntrf",
+   "fieldtype": "Section Break",
+   "label": "Podatki o napravi"
+  },
+  {
+   "default": "0",
+   "fieldname": "zvo\u010dniki",
+   "fieldtype": "Check",
+   "label": "Zvo\u010dniki"
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Link",
+   "label": "Status",
+   "options": "IT-Status"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Organizacija",
+   "options": "Enota"
+  },
+  {
+   "fieldname": "computer_link",
+   "fieldtype": "Link",
+   "in_filter": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Attached to Computer",
+   "options": "Computer",
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "is_computer",
+   "fieldtype": "Check",
+   "label": "Ra\u010dunalnik"
+  },
+  {
+   "fieldname": "column_break_mywh",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "opombe",
+   "fieldtype": "Small Text",
+   "label": "Opombe"
+  },
+  {
+   "fieldname": "tab_5_tab",
+   "fieldtype": "Tab Break",
+   "label": "Movements"
+  },
+  {
+   "fieldname": "movements_html",
+   "fieldtype": "HTML"
+  },
+  {
+   "fieldname": "bookings_html",
+   "fieldtype": "HTML"
+  },
+  {
+   "fieldname": "bookings_tab",
+   "fieldtype": "Tab Break",
+   "label": "Bookings"
+  },
+  {
+   "fieldname": "location",
+   "fieldtype": "Link",
+   "in_filter": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Lokacija",
+   "options": "Location",
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "device_manufacturer",
+   "fieldtype": "Link",
+   "label": "Proizvajalec",
+   "options": "IT-Device Manufacturer"
+  },
+  {
+   "fetch_from": "link_yzwv.manufacturer_part_no",
+   "fieldname": "device_manufacturer_model",
+   "fieldtype": "Data",
+   "label": "Model/oznaka proizvajalca",
+   "read_only": 1
+  },
+  {
+   "fieldname": "attached_ips_html",
+   "fieldtype": "HTML",
+   "label": "Attached ip"
+  },
+  {
+   "fieldname": "column_break_xvhb",
+   "fieldtype": "Column Break"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+  "links": [
+   {
+    "link_doctype": "Device IP Link",
+    "link_fieldname": "device_link"
+   },
+   {
+    "link_doctype": "Computer Device Link",
+    "link_fieldname": "device_link"
+   },
+   {
+    "link_doctype": "Computer",
+    "link_fieldname": "device_link"
+   },
+   {
+    "link_doctype": "Device Loan",
+    "link_fieldname": "device"
+   }
+  ],
+ "modified": "2025-12-16 09:28:06.317704",
+ "modified_by": "Administrator",
+ "module": "IT_Oprema",
+ "name": "Device",
+ "naming_rule": "Expression (old style)",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "search_fields": "device_name, device_id, computer_link",
+ "show_title_field_in_link": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [
+  {
+   "color": "Green",
+   "title": "Active"
+  },
+  {
+   "color": "Blue",
+   "title": "New"
+  },
+  {
+   "color": "Gray",
+   "title": "Inactive"
+  }
+ ],
+ "title_field": "device_inventory_code",
+ "track_changes": 1
+}

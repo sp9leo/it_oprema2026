@@ -1,0 +1,28 @@
+{% extends "templates/reservations_web.html" %}
+
+{% block title %}Izposoja naprav{% endblock %}
+
+{% block page_content %}
+<div class="container py-4">
+  <h1 class="mb-2">Izposoja naprav</h1>
+  <p class="text-muted mb-4">Izberite napravo za izposojo</p>
+
+  <div class="row">
+    {% for d in devices %}
+    <div class="col-md-4 mb-3">
+      <div class="card h-100 shadow-sm">
+        <div class="card-body">
+          <h5 class="card-title">{{ d.device_name }}</h5>
+          <p class="card-text small text-muted mb-1">
+            {% if d.group_name %}{{ d.group_name }}{% endif %}
+            {% if d.manufacturer_name %} &middot; {{ d.manufacturer_name }}{% endif %}
+          </p>
+          <p class="card-text small text-muted">{{ d.device_inventory_code }}</p>
+          <a href="/book?device={{ d.name }}" class="btn btn-primary btn-sm">Izposodi si</a>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}
