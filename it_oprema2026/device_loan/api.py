@@ -92,6 +92,21 @@ def lookup_loan(email, booking_ref):
 
 
 @frappe.whitelist(allow_guest=True)
+def get_loan_by_token(access_token):
+    loan = frappe.db.get_value(
+        "Device Loan",
+        {"access_token": access_token},
+        ["name", "device", "customer_name", "customer_email",
+         "from_date", "to_date", "purpose", "status", "booking_ref",
+         "access_token", "creation"],
+        as_dict=True
+    )
+    if loan:
+        loan.device_name = frappe.db.get_value("Device", loan.device, "device_name")
+    return loan
+
+
+@frappe.whitelist(allow_guest=True)
 def cancel_loan(access_token):
     loan = frappe.get_doc("Device Loan", {"access_token": access_token})
     if loan.status == "Cancelled":

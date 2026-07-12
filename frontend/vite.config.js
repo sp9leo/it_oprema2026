@@ -1,54 +1,8 @@
 import vue from '@vitejs/plugin-vue'
-import frappeui from 'frappe-ui/vite'
 import path from 'path'
 import fs from 'fs'
 import { execFileSync } from "child_process";
 import { defineConfig } from 'vite'
-
-const VIRTUAL_PREFIX = '~icons/lucide/'
-const RESOLVED_PREFIX = 'virtual:lucide/'
-
-function lucideIconsPlugin() {
-  const warnedIcons = new Set()
-  return {
-    name: 'lucide-icons-resolver',
-    resolveId(id) {
-      if (id.startsWith(VIRTUAL_PREFIX)) {
-        return RESOLVED_PREFIX + id.slice(VIRTUAL_PREFIX.length)
-      }
-    },
-    load(id) {
-      const normalized = id.split('?', 1)[0]
-      if (!normalized.startsWith(RESOLVED_PREFIX)) return
-      const iconName = normalized.slice(RESOLVED_PREFIX.length)
-      if (!warnedIcons.has(iconName)) {
-        warnedIcons.add(iconName)
-        this.warn(`[lucide-icons] placeholder for "${iconName}"`)
-      }
-      return `
-import { h } from 'vue'
-export default {
-  inheritAttrs: false,
-  render() {
-    return h('svg', {
-      xmlns: 'http://www.w3.org/2000/svg',
-      width: '24',
-      height: '24',
-      viewBox: '0 0 24 24',
-      fill: 'none',
-      stroke: 'currentColor',
-      'stroke-width': '1.5',
-      'stroke-linecap': 'round',
-      'stroke-linejoin': 'round',
-      ...this.$attrs,
-      innerHTML: '<circle cx="12" cy="12" r="10"/>',
-    })
-  }
-}
-`
-    },
-  }
-}
 
 function getBenchPath() {
   let currentDir = process.cwd()
@@ -87,21 +41,18 @@ function tryDetectSite() {
   return null
 }
 
+function detectProxyTarget() {
+  const site = tryDetectSite()
+  if (site) return `http://${site}:8000`
+  return process.env.VITE_BACKEND_URL || 'http://192.168.1.111:8000'
+}
+
 export default defineConfig({
   define: {
     __VUE_PROD_HYDRATION_MISMATCH_DETAILS__: 'false',
   },
   plugins: [
     vue(),
-    frappeui({
-      frappeProxy: true,
-      lucideIcons: false,
-      jinjaBootData: true,
-      buildConfig: {
-        indexHtmlPath: "../it_oprema2026/www/it_oprema2026.html",
-      },
-    }),
-    lucideIconsPlugin(),
     {
       name: 'custom-start-message',
       configureServer(server) {
@@ -129,21 +80,20 @@ export default defineConfig({
     watch: {
       usePolling: true,
     },
+    proxy: {
+      '/api': {
+        target: detectProxyTarget(),
+        changeOrigin: true,
+      },
+      '/assets': {
+        target: detectProxyTarget(),
+        changeOrigin: true,
+      },
+    },
   },
   resolve: {
     alias: {
       '@': path.resolve(__dirname, 'src'),
-      'tailwind.config.js': path.resolve(__dirname, 'tailwind.config.js'),
     },
-  },
-  optimizeDeps: {
-    include: [
-      'frappe-ui > feather-icons',
-      'tailwind.config.js',
-      'engine.io-client',
-      'highlight.js/lib/core',
-      'interactjs',
-      'debug',
-    ],
   },
 })
