@@ -166,7 +166,128 @@
    "role": "System Manager"
   }
  ],
- "sequence_id": 28.0,
+  "sidebar_items": [
+   {
+    "type": "Link",
+    "label": "Device",
+    "link_type": "DocType",
+    "link_to": "Device",
+    "icon": "device-hub"
+   },
+   {
+    "type": "Link",
+    "label": "Computer",
+    "link_type": "DocType",
+    "link_to": "Computer",
+    "icon": "monitor"
+   },
+   {
+    "type": "Link",
+    "label": "Device Group",
+    "link_type": "DocType",
+    "link_to": "Device Group",
+    "icon": "folder"
+   },
+   {
+    "type": "Link",
+    "label": "Location",
+    "link_type": "DocType",
+    "link_to": "Location",
+    "icon": "map-pin"
+   },
+   {
+    "type": "Link",
+    "label": "Enota",
+    "link_type": "DocType",
+    "link_to": "Enota",
+    "icon": "building"
+   },
+   {
+    "type": "Link",
+    "label": "Device Movement",
+    "link_type": "DocType",
+    "link_to": "Device Movement",
+    "icon": "move"
+   },
+   {
+    "type": "Link",
+    "label": "Dogodki",
+    "link_type": "DocType",
+    "link_to": "Dogodki",
+    "icon": "calendar"
+   },
+   {
+    "type": "Link",
+    "label": "Bookable Items",
+    "link_type": "DocType",
+    "link_to": "Bookable Items",
+    "icon": "book"
+   },
+   {
+    "type": "Link",
+    "label": "IP Address",
+    "link_type": "DocType",
+    "link_to": "IP Address",
+    "icon": "globe"
+   },
+   {
+    "type": "Link",
+    "label": "IT-Manufacturer",
+    "link_type": "DocType",
+    "link_to": "IT-Manufacturer",
+    "icon": "briefcase"
+   },
+   {
+    "type": "Link",
+    "label": "IT-Device Manufacturer",
+    "link_type": "DocType",
+    "link_to": "IT-Device Manufacturer",
+    "icon": "briefcase"
+   },
+   {
+    "type": "Link",
+    "label": "IT-Status",
+    "link_type": "DocType",
+    "link_to": "IT-Status",
+    "icon": "tag"
+   },
+   {
+    "type": "Link",
+    "label": "Device IP Link",
+    "link_type": "DocType",
+    "link_to": "Device IP Link",
+    "icon": "link"
+   },
+   {
+    "type": "Link",
+    "label": "Computer Device Link",
+    "link_type": "DocType",
+    "link_to": "Computer Device Link",
+    "icon": "link"
+   },
+   {
+    "type": "Link",
+    "label": "Linked Location",
+    "link_type": "DocType",
+    "link_to": "Linked Location",
+    "icon": "map-pin"
+   },
+   {
+    "type": "Link",
+    "label": "Device Movement Item",
+    "link_type": "DocType",
+    "link_to": "Device Movement Item",
+    "icon": "move"
+   },
+   {
+    "type": "Link",
+    "label": "Device Loan",
+    "link_type": "DocType",
+    "link_to": "Device Loan",
+    "icon": "hand"
+   }
+  ],
+  "sequence_id": 28.0,
  "shortcuts": [
   {
    "color": "Blue",

@@ -13,7 +13,7 @@ add_to_apps_screen = [
         "name": "it_oprema2026",
         "logo": "/assets/it_oprema2026/images/logo.svg",
         "title": "IT Oprema 2026",
-        "route": "/it_oprema2026",
+        "route": "/app/reservations",
     }
 ]
 
