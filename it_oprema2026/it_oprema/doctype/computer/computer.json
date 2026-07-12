@@ -221,16 +221,12 @@
   }
  ],
  "index_web_pages_for_search": 1,
- "links": [
-  {
-   "link_doctype": "Asset Movement",
-   "link_fieldname": "asset"
-  },
-  {
-   "link_doctype": "Device",
-   "link_fieldname": "computer_link"
-  }
- ],
+  "links": [
+   {
+    "link_doctype": "Device",
+    "link_fieldname": "computer_link"
+   }
+  ],
  "modified": "2025-12-16 08:37:54.882547",
  "modified_by": "Administrator",
  "module": "IT_Oprema",
