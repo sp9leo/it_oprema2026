@@ -5,6 +5,51 @@ import fs from 'fs'
 import { execFileSync } from "child_process";
 import { defineConfig } from 'vite'
 
+const VIRTUAL_PREFIX = '~icons/lucide/'
+const RESOLVED_PREFIX = 'virtual:lucide/'
+
+function lucideIconsPlugin() {
+  const warnedIcons = new Set()
+  return {
+    name: 'lucide-icons-resolver',
+    resolveId(id) {
+      if (id.startsWith(VIRTUAL_PREFIX)) {
+        return RESOLVED_PREFIX + id.slice(VIRTUAL_PREFIX.length)
+      }
+    },
+    load(id) {
+      const normalized = id.split('?', 1)[0]
+      if (!normalized.startsWith(RESOLVED_PREFIX)) return
+      const iconName = normalized.slice(RESOLVED_PREFIX.length)
+      if (!warnedIcons.has(iconName)) {
+        warnedIcons.add(iconName)
+        this.warn(`[lucide-icons] placeholder for "${iconName}"`)
+      }
+      return `
+import { h } from 'vue'
+export default {
+  inheritAttrs: false,
+  render() {
+    return h('svg', {
+      xmlns: 'http://www.w3.org/2000/svg',
+      width: '24',
+      height: '24',
+      viewBox: '0 0 24 24',
+      fill: 'none',
+      stroke: 'currentColor',
+      'stroke-width': '1.5',
+      'stroke-linecap': 'round',
+      'stroke-linejoin': 'round',
+      ...this.$attrs,
+      innerHTML: '<circle cx="12" cy="12" r="10"/>',
+    })
+  }
+}
+`
+    },
+  }
+}
+
 function getBenchPath() {
   let currentDir = process.cwd()
   while (currentDir !== '/') {
@@ -37,7 +82,7 @@ function tryDetectSite() {
       }
     }
   } catch (e) {
-    // bench not available or no site found — dev server still works
+    // bench not available or no site found
   }
   return null
 }
@@ -50,12 +95,13 @@ export default defineConfig({
     vue(),
     frappeui({
       frappeProxy: true,
-      lucideIcons: true,
+      lucideIcons: false,
       jinjaBootData: true,
       buildConfig: {
         indexHtmlPath: "../it_oprema2026/www/it_oprema2026.html",
       },
     }),
+    lucideIconsPlugin(),
     {
       name: 'custom-start-message',
       configureServer(server) {
