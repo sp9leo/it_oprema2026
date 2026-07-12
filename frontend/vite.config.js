@@ -50,7 +50,7 @@ export default defineConfig({
     vue(),
     frappeui({
       frappeProxy: true,
-      lucideIcons: true,
+      lucideIcons: false,
       jinjaBootData: true,
       buildConfig: {
         indexHtmlPath: "../it_oprema2026/www/it_oprema2026.html",
