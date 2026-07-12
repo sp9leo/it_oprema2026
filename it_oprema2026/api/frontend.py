@@ -27,7 +27,7 @@ def get_devices(
     devices = frappe.db.sql(
         f"""
         SELECT name, device_inventory_code, device_id, device_name, device_group,
-               status, location, company, device_serial, is_computer
+               status, location, current_location, company, device_serial, is_computer
         FROM `tabDevice`
         WHERE 1=1 {conditions}
         ORDER BY modified DESC
@@ -97,3 +97,21 @@ def get_doctype_list() -> list:
         "SELECT name FROM information_schema.tables WHERE table_name LIKE 'tab%' AND table_schema = DATABASE()"
     )
     return [t.replace("tab", "") for t in sorted(tables)]
+
+
+@frappe.whitelist()
+def get_device_location_log(
+    device: str, limit: int = 50, offset: int = 0
+) -> dict:
+    logs = frappe.db.sql(
+        f"""
+        SELECT name, device, location, previous_location, timestamp, user, notes
+        FROM `tabDevice Location Log`
+        WHERE device = {frappe.db.escape(device)}
+        ORDER BY timestamp DESC
+        LIMIT {int(limit)} OFFSET {int(offset)}
+    """,
+        as_dict=True,
+    )
+    total = frappe.db.count("Device Location Log", {"device": device})
+    return {"data": logs, "total": total}
