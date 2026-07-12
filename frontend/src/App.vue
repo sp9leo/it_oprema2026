@@ -49,6 +49,8 @@ import Moon from '~icons/lucide/moon'
 import User from '~icons/lucide/user'
 import BookOpen from '~icons/lucide/book-open'
 import Learn from '~icons/lucide/graduation-cap'
+import DeviceHub from '~icons/lucide/device-hub'
+import Hand from '~icons/lucide/hand'
 
 const showPing = ref(false)
 
@@ -81,9 +83,16 @@ const sidebar = reactive({
   },
   sections: [
     {
-      label: '',
+      label: 'Navigation',
       items: [
         { label: 'Home', icon: Home, to: '/' },
+        { label: 'Devices', icon: DeviceHub, to: '/devices' },
+        { label: 'Device Loans', icon: Hand, to: '/loans' },
+      ],
+    },
+    {
+      label: 'Resources',
+      items: [
         { label: 'Documentation', icon: BookOpen, to: '/docs' },
         { label: 'Learn', icon: Learn, to: '/learn' },
       ],
@@ -97,6 +106,6 @@ const sidebar = reactive({
   margin-left: auto;
   margin-right: auto;
   width: 100%;
-  max-width: 940px;
+  max-width: 1100px;
 }
 </style>

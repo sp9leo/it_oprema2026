@@ -7,6 +7,21 @@ const routes = [
     component: () => import('@/pages/Home.vue'),
   },
   {
+    path: '/devices',
+    name: 'Devices',
+    component: () => import('@/pages/DeviceList.vue'),
+  },
+  {
+    path: '/devices/:id',
+    name: 'DeviceDetail',
+    component: () => import('@/pages/DeviceDetail.vue'),
+  },
+  {
+    path: '/loans',
+    name: 'Loans',
+    component: () => import('@/pages/DeviceLoan.vue'),
+  },
+  {
     path: '/docs',
     name: 'Docs',
     beforeEnter: () => {

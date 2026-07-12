@@ -142,7 +142,8 @@ export default defineConfig({
       'tailwind.config.js',
       'engine.io-client',
       'highlight.js/lib/core',
-      'interactjs'
+      'interactjs',
+      'debug',
     ],
   },
 })

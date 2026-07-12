@@ -1,62 +1,102 @@
 <template>
   <div>
-    <div class="text-2xl font-semibold text-ink-gray-8">IT Oprema 2026</div>
-    <div class="mt-4">
-      <p>Welcome to IT Oprema 2026 — IT asset management and device booking system.</p>
-      <br />
-      <div class="flex gap-2 items-center">
-        <p>Your app <b>it_oprema2026</b> is</p>
-        <MultiSelect
-          :options="opinions"
-          v-model="state"
-          placeholder="How do you feel?"
-        />
-      </div>
-      <div class="flex mt-2 gap-2">
-        Today <DatePicker v-model="dateValue" placeholder="Select Date" label="Label" /> is beautiful.
-      </div>
-    </div>
+    <div class="text-2xl font-semibold text-ink-gray-8 mb-6">Dashboard</div>
 
-    <div class="mt-10">
-      <h2 class="text-xl font-semibold mb-4">Quick Links</h2>
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        <router-link
-          v-for="link in quickLinks"
-          :key="link.label"
-          to="#"
-          class="flex items-center gap-3 rounded-lg border bg-surface-white px-4 py-4 transition hover:bg-surface-gray-1"
-        >
-          <component :is="link.icon" class="h-6 w-6 text-ink-gray-6" />
-          <div>
-            <div class="text-sm font-medium">{{ link.label }}</div>
-            <div class="text-xs text-ink-gray-5">{{ link.description }}</div>
+    <div v-if="stats.loading" class="text-ink-gray-5">Loading...</div>
+
+    <template v-else-if="stats.data">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <div class="rounded-lg border bg-surface-white p-4 flex items-center gap-4">
+          <div class="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center text-blue-700">
+            <span class="i-lucide-device-hub text-xl" />
           </div>
-        </router-link>
+          <div>
+            <div class="text-2xl font-bold">{{ stats.data.total_devices }}</div>
+            <div class="text-sm text-ink-gray-5">Total Devices</div>
+          </div>
+        </div>
+        <div class="rounded-lg border bg-surface-white p-4 flex items-center gap-4">
+          <div class="w-10 h-10 rounded-lg bg-cyan-100 flex items-center justify-center text-cyan-700">
+            <span class="i-lucide-monitor text-xl" />
+          </div>
+          <div>
+            <div class="text-2xl font-bold">{{ stats.data.total_computers }}</div>
+            <div class="text-sm text-ink-gray-5">Computers</div>
+          </div>
+        </div>
+        <div class="rounded-lg border bg-surface-white p-4 flex items-center gap-4">
+          <div class="w-10 h-10 rounded-lg bg-orange-100 flex items-center justify-center text-orange-700">
+            <span class="i-lucide-hand text-xl" />
+          </div>
+          <div>
+            <div class="text-2xl font-bold">{{ stats.data.active_loans }}</div>
+            <div class="text-sm text-ink-gray-5">Active Loans</div>
+          </div>
+        </div>
+        <div class="rounded-lg border bg-surface-white p-4 flex items-center gap-4">
+          <div class="w-10 h-10 rounded-lg bg-green-100 flex items-center justify-center text-green-700">
+            <span class="i-lucide-map-pin text-xl" />
+          </div>
+          <div>
+            <div class="text-2xl font-bold">{{ stats.data.total_locations }}</div>
+            <div class="text-sm text-ink-gray-5">Locations</div>
+          </div>
+        </div>
       </div>
-    </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="rounded-lg border bg-surface-white p-4">
+          <h3 class="text-lg font-medium mb-3">Recent Movements</h3>
+          <div v-if="stats.data.recent_movements?.length">
+            <div
+              v-for="m in stats.data.recent_movements"
+              :key="m.name"
+              class="flex items-center justify-between py-2 border-b last:border-0 text-sm"
+            >
+              <span class="font-medium">{{ m.asset }}</span>
+              <span class="text-ink-gray-5">{{ m.from_location || '?' }} &rarr; {{ m.to_location || '?' }}</span>
+            </div>
+          </div>
+          <div v-else class="text-sm text-ink-gray-5">No recent movements</div>
+        </div>
+
+        <div class="rounded-lg border bg-surface-white p-4">
+          <h3 class="text-lg font-medium mb-3">Active Loans</h3>
+          <div v-if="stats.data.recent_loans?.length">
+            <div
+              v-for="l in stats.data.recent_loans"
+              :key="l.name"
+              class="flex items-center justify-between py-2 border-b last:border-0 text-sm"
+            >
+              <span class="font-medium">{{ l.booking_asset }}</span>
+              <Badge :theme="loanStatusTheme(l.booking_status)" size="sm">{{ l.booking_status }}</Badge>
+            </div>
+          </div>
+          <div v-else class="text-sm text-ink-gray-5">No active loans</div>
+        </div>
+      </div>
+    </template>
+
+    <div v-else class="text-ink-gray-5">Could not load dashboard data.</div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
-import { MultiSelect, DatePicker } from 'frappe-ui'
-import DeviceHub from '~icons/lucide/device-hub'
-import Hand from '~icons/lucide/hand'
-import Move from '~icons/lucide/move'
-import Monitor from '~icons/lucide/monitor'
+import { createResource } from 'frappe-ui'
+import { Badge } from 'frappe-ui'
 
-const opinions = [
-  { value: 'helpful', label: 'Helpful' },
-  { value: 'useful', label: 'Useful' },
-  { value: 'amazing', label: 'Amazing' },
-]
-const state = ref(['amazing'])
-const dateValue = ref(new Date().toLocaleDateString())
+const stats = createResource({
+  url: '/api/method/it_oprema2026.api.frontend.get_dashboard_stats',
+  auto: true,
+})
 
-const quickLinks = [
-  { label: 'Devices', description: 'Manage IT devices', icon: DeviceHub },
-  { label: 'Computers', description: 'Computer inventory', icon: Monitor },
-  { label: 'Device Loans', description: 'Track device borrowing', icon: Hand },
-  { label: 'Movements', description: 'Device movement history', icon: Move },
-]
+function loanStatusTheme(status: string): string {
+  const map: Record<string, string> = {
+    Requested: 'blue',
+    Approved: 'green',
+    Active: 'orange',
+    Returned: 'purple',
+  }
+  return map[status] || 'gray'
+}
 </script>
