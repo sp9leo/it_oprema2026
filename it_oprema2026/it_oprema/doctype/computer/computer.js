@@ -250,53 +250,66 @@ frappe.ui.form.on('Computer', {
                         },
                         callback: function(res) {
                             let links = res.message || [];
+                            let ip_wrapper = frm.fields_dict.device_ips_html?.$wrapper;
+                            if (!ip_wrapper) return;
+
+                            let ip_html = `
+                                <h4>
+                                    Attached IP Addresses
+                                    <button class="btn btn-xs btn-primary pull-right attach-ip-btn" style="margin-left: 8px;">
+                                        Attach IP
+                                    </button>
+                                </h4>
+                            `;
+
                             if (!links.length) {
-                                frm.fields_dict.device_info_html.$wrapper.append("<p>No IPs attached.</p>");
+                                ip_html += `<p>No IPs attached.</p>`;
+                            } else {
+                                let ip_names = links.map(ip => ip.ip_address_link);
+                                frappe.call({
+                                    method: "frappe.client.get_list",
+                                    args: {
+                                        doctype: "IP Address",
+                                        filters: { name: ["in", ip_names] },
+                                        fields: ["name", "ip_address", "status"]
+                                    },
+                                    callback: function(res2) {
+                                        let ip_docs = {};
+                                        (res2.message || []).forEach(doc => {
+                                            ip_docs[doc.name] = doc;
+                                        });
+
+                                        ip_html += `
+                                            <table class="table table-bordered">
+                                                <thead>
+                                                    <tr><th>IP Address</th><th>Status</th><th>Attached On</th><th>Notes</th><th>Action</th></tr>
+                                                </thead>
+                                                <tbody>
+                                        `;
+
+                                        links.forEach(link => {
+                                            let ip_doc = ip_docs[link.ip_address_link] || {};
+                                            ip_html += `
+                                                <tr>
+                                                    <td><a href="/app/ip-address/${link.ip_address_link}">${ip_doc.ip_address || link.ip_address_link}</a></td>
+                                                    <td>${ip_doc.status || ''}</td>
+                                                    <td>${link.attached_on ? moment(link.attached_on).format("YYYY-MM-DD HH:mm:ss") : ''}</td>
+                                                    <td>${link.notes || ''}</td>
+                                                    <td><button class="btn btn-xs btn-danger detach-ip-btn" data-ip="${link.ip_address_link}">Detach</button></td>
+                                                </tr>
+                                            `;
+                                        });
+
+                                        ip_html += `</tbody></table>`;
+                                        ip_wrapper.html(ip_html);
+                                        bind_ip_events(frm);
+                                    }
+                                });
                                 return;
                             }
 
-                            // Collect IP names
-                            let ip_names = links.map(ip => ip.ip_address_link);
-
-                            // Fetch IP Address docs in one go
-                            frappe.call({
-                                method: "frappe.client.get_list",
-                                args: {
-                                    doctype: "IP Address",
-                                    filters: { name: ["in", ip_names] },
-                                    fields: ["name", "ip_address", "status"]
-                                },
-                                callback: function(res2) {
-                                    let ip_docs = {};
-                                    (res2.message || []).forEach(doc => {
-                                        ip_docs[doc.name] = doc;
-                                    });
-
-                                    let ip_html = `
-                                        <h4>Attached IP Addresses</h4>
-                                        <table class="table table-bordered">
-                                            <thead>
-                                                <tr><th>IP Address</th><th>Status</th><th>Attached On</th><th>Notes</th></tr>
-                                            </thead>
-                                            <tbody>
-                                    `;
-
-                                    links.forEach(link => {
-                                        let ip_doc = ip_docs[link.ip_address_link] || {};
-                                        ip_html += `
-                                            <tr>
-                                                <td><a href="/app/ip-address/${link.ip_address_link}">${ip_doc.ip_address || link.ip_address_link}</a></td>
-                                                <td>${ip_doc.status || ''}</td>
-                                                <td>${link.attached_on ? moment(link.attached_on).format("YYYY-MM-DD HH:mm:ss") : ''}</td>
-                                                <td>${link.notes || ''}</td>
-                                            </tr>
-                                        `;
-                                    });
-
-                                    ip_html += `</tbody></table>`;
-                                    frm.fields_dict.device_ips_html.$wrapper.append(ip_html);
-                                }
-                            });
+                            ip_wrapper.html(ip_html);
+                            bind_ip_events(frm);
                         }
                     });
                 }
@@ -305,8 +318,78 @@ frappe.ui.form.on('Computer', {
             if (frm.fields_dict.device_info_html) {
                 frm.fields_dict.device_info_html.$wrapper.html("<p>No device linked.</p>");
             }
+            if (frm.fields_dict.device_ips_html) {
+                frm.fields_dict.device_ips_html.$wrapper.html("<p>No device linked. Attach a device to manage IPs.</p>");
+            }
         }
     }
 });
+
+function bind_ip_events(frm) {
+    frm.$wrapper.find('.attach-ip-btn').off('click').on('click', function() {
+        frappe.prompt([
+            {
+                fieldname: 'ip_address',
+                label: 'Select IP Address',
+                fieldtype: 'Link',
+                options: 'IP Address',
+                reqd: 1,
+                get_query: () => ({
+                    filters: [["IP Address", "is_linked", "=", 0]]
+                })
+            }
+        ],
+        (values) => {
+            frappe.call({
+                method: "it_oprema2026.api.frontend.attach_ip",
+                args: {
+                    device: frm.doc.device_link,
+                    ip_address: values.ip_address
+                },
+                callback: function(r) {
+                    if (r.message && r.message.warning) {
+                        frappe.confirm(r.message.warning, () => {
+                            frappe.call({
+                                method: "it_oprema2026.api.frontend.attach_ip",
+                                args: {
+                                    device: frm.doc.device_link,
+                                    ip_address: values.ip_address,
+                                    force: true
+                                },
+                                callback: function() {
+                                    frappe.msgprint(`IP ${values.ip_address} attached.`);
+                                    frm.reload_doc();
+                                }
+                            });
+                        });
+                    } else if (r.message && r.message.ok) {
+                        frappe.msgprint(r.message.message);
+                        frm.reload_doc();
+                    }
+                }
+            });
+        },
+        'Attach IP Address',
+        'Attach'
+        );
+    });
+
+    frm.$wrapper.find('.detach-ip-btn').off('click').on('click', function() {
+        let ip = $(this).data('ip');
+        frappe.confirm(`Detach IP ${ip} from ${frm.doc.device_link}?`, () => {
+            frappe.call({
+                method: "it_oprema2026.api.frontend.detach_ip",
+                args: {
+                    device: frm.doc.device_link,
+                    ip_address: ip
+                },
+                callback: function() {
+                    frappe.msgprint(`IP ${ip} detached.`);
+                    frm.reload_doc();
+                }
+            });
+        });
+    });
+}
 
 
