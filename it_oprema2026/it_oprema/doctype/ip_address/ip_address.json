@@ -7,30 +7,62 @@
  "engine": "InnoDB",
  "field_order": [
   "ip_address",
-  "device_link",
-  "status"
+  "network",
+  "column_break_1",
+  "status",
+  "is_linked",
+  "device_link"
  ],
  "fields": [
   {
    "fieldname": "ip_address",
    "fieldtype": "Data",
-   "label": "IP address"
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "IP Address",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "network",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Network",
+   "options": "Network",
+   "search_index": 1
+  },
+  {
+   "fieldname": "column_break_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Status",
+   "options": "Active\nInactive\nReserved"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_linked",
+   "fieldtype": "Check",
+   "label": "Is Linked",
+   "read_only": 1
   },
   {
    "fieldname": "device_link",
    "fieldtype": "Link",
    "label": "Device",
-   "options": "Device"
-  },
-  {
-   "fieldname": "status",
-   "fieldtype": "Select"
+   "options": "Device",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-12-16 08:47:26.374948",
+ "modified": "2026-07-12 00:00:00.000000",
  "modified_by": "Administrator",
  "module": "IT_Oprema",
  "name": "IP Address",
