@@ -260,17 +260,16 @@
    "fieldtype": "Tab Break",
    "label": "Bookings"
   },
-  {
-   "fieldname": "location",
-   "fieldtype": "Link",
-   "in_filter": 1,
-   "in_list_view": 1,
-   "in_standard_filter": 1,
-   "label": "Lokacija",
-   "options": "Location",
-   "read_only": 1,
-   "search_index": 1
-  },
+   {
+    "fieldname": "location",
+    "fieldtype": "Link",
+    "in_filter": 1,
+    "in_list_view": 1,
+    "in_standard_filter": 1,
+    "label": "Lokacija",
+    "options": "Location",
+    "search_index": 1
+   },
   {
    "fieldname": "device_manufacturer",
    "fieldtype": "Link",
