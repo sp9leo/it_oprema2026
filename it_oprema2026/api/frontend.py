@@ -7,7 +7,7 @@ def ping():
 
 
 @frappe.whitelist()
-def get_dashboard_stats():
+def get_dashboard_stats() -> dict:
     return {
         "total_devices": frappe.db.count("Device"),
         "total_computers": frappe.db.count("Computer"),
@@ -19,10 +19,10 @@ def get_dashboard_stats():
 
 
 @frappe.whitelist()
-def get_devices(filters=None, limit=50, offset=0):
-    filters = frappe.parse_json(filters) if filters else {}
+def get_devices(filters: str | None = None, limit: int = 50, offset: int = 0) -> dict:
+    filters_dict = frappe.parse_json(filters) if filters else {}
     conditions = ""
-    for key, val in filters.items():
+    for key, val in filters_dict.items():
         conditions += f" AND {key} = {frappe.db.escape(val)}"
 
     devices = frappe.db.sql(f"""
@@ -34,12 +34,12 @@ def get_devices(filters=None, limit=50, offset=0):
         LIMIT {int(limit)} OFFSET {int(offset)}
     """, as_dict=True)
 
-    total = frappe.db.count("Device", filters)
+    total = frappe.db.count("Device", filters_dict)
     return {"data": devices, "total": total}
 
 
 @frappe.whitelist()
-def get_device_detail(name):
+def get_device_detail(name: str) -> dict:
     device = frappe.get_doc("Device", name)
     attachments = frappe.get_all("File", {
         "attached_to_doctype": "Device",
@@ -52,12 +52,11 @@ def get_device_detail(name):
 
 
 @frappe.whitelist()
-def get_computers(filters=None, limit=50, offset=0):
+def get_computers(filters: str | None = None, limit: int = 50, offset: int = 0) -> dict:
     conditions = ""
-    if filters:
-        filters = frappe.parse_json(filters)
-        for key, val in filters.items():
-            conditions += f" AND {key} = {frappe.db.escape(val)}"
+    filters_dict = frappe.parse_json(filters) if filters else {}
+    for key, val in filters_dict.items():
+        conditions += f" AND {key} = {frappe.db.escape(val)}"
 
     computers = frappe.db.sql(f"""
         SELECT name, computer_name, computer_inventory_code, computer_id,
@@ -68,12 +67,12 @@ def get_computers(filters=None, limit=50, offset=0):
         LIMIT {int(limit)} OFFSET {int(offset)}
     """, as_dict=True)
 
-    total = frappe.db.count("Computer", filters if isinstance(filters, dict) else {})
+    total = frappe.db.count("Computer", filters_dict)
     return {"data": computers, "total": total}
 
 
 @frappe.whitelist()
-def get_loans(status=None, limit=50, offset=0):
+def get_loans(status: str | None = None, limit: int = 50, offset: int = 0) -> dict:
     conditions = ""
     if status:
         conditions = f" AND booking_status = {frappe.db.escape(status)}"
@@ -92,7 +91,7 @@ def get_loans(status=None, limit=50, offset=0):
 
 
 @frappe.whitelist()
-def get_movements(limit=50, offset=0):
+def get_movements(limit: int = 50, offset: int = 0) -> dict:
     movements = frappe.db.sql(f"""
         SELECT name, asset, from_location, to_location, moved_by,
                movement_date, notes
@@ -106,7 +105,7 @@ def get_movements(limit=50, offset=0):
 
 
 @frappe.whitelist()
-def get_locations():
+def get_locations() -> list:
     return frappe.db.sql("""
         SELECT name, location_name, parent_location, location_number, is_group
         FROM `tabLocation`
