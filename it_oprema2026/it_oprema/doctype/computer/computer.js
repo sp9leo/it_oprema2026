@@ -68,11 +68,11 @@ frappe.ui.form.on('Computer', {
                         `Detach ${device} from Computer ${frm.doc.name}?`,
                         () => {
                             frappe.call({
-                                method: "it_oprema.it_oprema.api.detach_device",
-                                args: {
-                                    computer_link: frm.doc.name,
-                                    device_link: device
-                                },
+                    method: "it_oprema2026.api.frontend.detach_device",
+                    args: {
+                        computer: frm.doc.name,
+                        device: device_name
+                    },
                                 callback: function() {
                                     frappe.msgprint(`Device ${device} detached successfully`);
                                     frm.reload_doc();
@@ -104,11 +104,11 @@ frappe.ui.form.on('Computer', {
                     ],
                     (values) => {
                         frappe.call({
-                            method: "it_oprema.it_oprema.api.attach_device",
-                            args: {
-                                computer_link: frm.doc.name,
-                                device_link: values.device_link
-                            },
+                method: "it_oprema2026.api.frontend.attach_device",
+                args: {
+                    computer: frm.doc.name,
+                    device: values.device_link
+                },
                             callback: function(r) {
                                 if (r.message && r.message.warning) {
                                     frappe.confirm(
@@ -116,12 +116,12 @@ frappe.ui.form.on('Computer', {
                                         () => {
                                             // Retry with force=True
                                             frappe.call({
-                                                method: "it_oprema.it_oprema.api.attach_device",
-                                                args: {
-                                                    computer_link: frm.doc.name,
-                                                    device_link: values.device_link,
-                                                    force: true
-                                                },
+                                            method: "it_oprema2026.api.frontend.attach_device",
+                                            args: {
+                                                computer: frm.doc.name,
+                                                device: values.device_link,
+                                                force: true
+                                            },
                                                 callback: function() {
                                                     frappe.msgprint(`Device ${values.device_link} re‑attached to Computer ${frm.doc.name}`);
                                                     frm.reload_doc();

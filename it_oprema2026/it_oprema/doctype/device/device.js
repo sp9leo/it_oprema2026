@@ -90,10 +90,10 @@ frappe.ui.form.on('Device', {
                                 `Detach IP ${ip} from Device ${frm.doc.name}?`,
                                 () => {
                                     frappe.call({
-                                        method: "it_oprema.it_oprema.api.detach_ip",
+                                        method: "it_oprema2026.api.frontend.detach_ip",
                                         args: {
-                                            device_link: frm.doc.name,
-                                            ip_address_link: ip
+                                            device: frm.doc.name,
+                                            ip_address: ip
                                         },
                                         callback: function() {
                                             frappe.msgprint(`IP ${ip} detached successfully`);
@@ -123,23 +123,23 @@ frappe.ui.form.on('Device', {
                             ],
                             (values) => {
                                 frappe.call({
-                                    method: "it_oprema.it_oprema.api.attach_ip",
-                                    args: {
-                                        device_link: frm.doc.name,
-                                        ip_address_link: values.ip_address_link
-                                    },
+                                            method: "it_oprema2026.api.frontend.attach_ip",
+                                            args: {
+                                                device: frm.doc.name,
+                                                ip_address: values.ip_address_link,
+                                                force: true
+                                            },
                                     callback: function(r) {
                                         if (r.message && r.message.warning) {
                                             frappe.confirm(
                                                 r.message.warning,
                                                 () => {
                                                     frappe.call({
-                                                        method: "it_oprema.it_oprema.api.attach_ip",
-                                                        args: {
-                                                            device_link: frm.doc.name,
-                                                            ip_address_link: values.ip_address_link,
-                                                            force: true
-                                                        },
+                                    method: "it_oprema2026.api.frontend.attach_ip",
+                                    args: {
+                                        device: frm.doc.name,
+                                        ip_address: values.ip_address_link
+                                    },
                                                         callback: function() {
                                                             frappe.msgprint(`IP ${values.ip_address_link} re-attached to Device ${frm.doc.name}`);
                                                             frm.reload_doc();

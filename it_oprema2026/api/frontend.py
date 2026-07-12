@@ -115,3 +115,108 @@ def get_device_location_log(
     )
     total = frappe.db.count("Device Location Log", {"device": device})
     return {"data": logs, "total": total}
+
+
+@frappe.whitelist()
+def attach_device(computer: str, device: str, force: bool = False) -> dict:
+    existing = frappe.get_all(
+        "Computer Device Link",
+        filters={"device_link": device},
+        fields=["name", "computer_link"],
+    )
+    if existing:
+        current_computer = existing[0].computer_link
+        if current_computer != computer and not force:
+            return {
+                "ok": False,
+                "warning": f"Device {device} is already attached to Computer {current_computer}.",
+            }
+        if current_computer != computer:
+            frappe.delete_doc("Computer Device Link", existing[0].name, ignore_permissions=True)
+            frappe.db.set_value("Device", device, "computer_link", None)
+            frappe.get_doc("Computer", current_computer).add_comment(
+                "Info", f"Device {device} detached (re-attached to {computer})."
+            )
+
+    frappe.get_doc({
+        "doctype": "Computer Device Link",
+        "computer_link": computer,
+        "device_link": device,
+        "attached_on": frappe.utils.now_datetime(),
+    }).insert(ignore_permissions=True)
+    frappe.db.set_value("Device", device, "computer_link", computer)
+
+    comp_location = frappe.db.get_value("Computer", computer, "location")
+    if comp_location:
+        frappe.db.set_value("Device", device, "location", comp_location)
+
+    return {"ok": True, "message": f"Device {device} attached to Computer {computer}"}
+
+
+@frappe.whitelist()
+def detach_device(computer: str, device: str) -> dict:
+    existing = frappe.get_all(
+        "Computer Device Link",
+        filters={"computer_link": computer, "device_link": device},
+        fields=["name"],
+    )
+    if not existing:
+        return {"ok": False, "warning": f"Device {device} is not attached to Computer {computer}."}
+
+    frappe.delete_doc("Computer Device Link", existing[0].name, ignore_permissions=True)
+    frappe.db.set_value("Device", device, "computer_link", None)
+    frappe.db.set_value("Device", device, "location", None)
+    frappe.get_doc("Computer", computer).add_comment("Info", f"Device {device} detached.")
+    return {"ok": True, "message": f"Device {device} detached from Computer {computer}"}
+
+
+@frappe.whitelist()
+def attach_ip(device: str, ip_address: str, force: bool = False) -> dict:
+    existing = frappe.get_all(
+        "Device IP Link",
+        filters={"ip_address_link": ip_address},
+        fields=["device_link"],
+    )
+    if existing and existing[0].device_link != device and not force:
+        return {
+            "ok": False,
+            "warning": f"IP {ip_address} is already attached to Device {existing[0].device_link}.",
+        }
+    if existing and existing[0].device_link != device:
+        frappe.db.delete("Device IP Link", {
+            "device_link": existing[0].device_link,
+            "ip_address_link": ip_address,
+        })
+        frappe.get_doc("Device", existing[0].device_link).add_comment(
+            "Info", f"IP {ip_address} detached (re-attached to {device})."
+        )
+
+    frappe.get_doc({
+        "doctype": "Device IP Link",
+        "device_link": device,
+        "ip_address_link": ip_address,
+        "attached_on": frappe.utils.now_datetime(),
+    }).insert(ignore_permissions=True)
+
+    frappe.db.set_value("IP Address", ip_address, {
+        "is_linked": 1,
+        "device_link": device,
+    })
+    frappe.get_doc("Device", device).add_comment("Info", f"IP {ip_address} attached.")
+    frappe.get_doc("IP Address", ip_address).add_comment("Info", f"Attached to Device {device}.")
+    return {"ok": True, "message": f"IP {ip_address} attached to Device {device}"}
+
+
+@frappe.whitelist()
+def detach_ip(device: str, ip_address: str) -> dict:
+    frappe.db.delete("Device IP Link", {
+        "device_link": device,
+        "ip_address_link": ip_address,
+    })
+    frappe.db.set_value("IP Address", ip_address, {
+        "is_linked": 0,
+        "device_link": None,
+    })
+    frappe.get_doc("Device", device).add_comment("Info", f"IP {ip_address} detached.")
+    frappe.get_doc("IP Address", ip_address).add_comment("Info", f"Detached from Device {device}.")
+    return {"ok": True, "message": f"IP {ip_address} detached from Device {device}"}
