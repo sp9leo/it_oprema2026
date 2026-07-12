@@ -263,6 +263,14 @@
 
 frappe.ui.form.on('Device', {
     refresh: function(frm) {
+        if (!frm.doc.__islocal) {
+            load_location_log(frm);
+        }
+    }
+});
+
+frappe.ui.form.on('Device', {
+    refresh: function(frm) {
         frappe.call({
             method: "frappe.client.get_list",
             args: {
@@ -357,8 +365,51 @@ frappe.ui.form.on('Device', {
                 callback: function() {
                     frappe.msgprint(`IP ${ip} detached successfully`);
                     frm.reload_doc();
-                }
-            });
+    }
+});
+
+function load_location_log(frm) {
+    frappe.call({
+        method: "frappe.client.get_list",
+        args: {
+            doctype: "Device Location Log",
+            filters: { device: frm.doc.name },
+            fields: ["name", "location", "previous_location", "timestamp", "user", "notes"],
+            order_by: "timestamp desc",
+            limit_page_length: 50
+        },
+        callback: function(r) {
+            let logs = r.message || [];
+            let html = `<h4>Location History</h4>`;
+            if (logs.length) {
+                html += `<table class="table table-bordered table-hover">
+                    <thead>
+                        <tr>
+                            <th>Date/Time</th>
+                            <th>Location</th>
+                            <th>Previous</th>
+                            <th>User</th>
+                            <th>Notes</th>
+                        </tr>
+                    </thead>
+                    <tbody>`;
+                logs.forEach(function(log) {
+                    html += `<tr>
+                        <td>${log.timestamp}</td>
+                        <td>${log.location || '-'}</td>
+                        <td>${log.previous_location || '-'}</td>
+                        <td>${log.user || '-'}</td>
+                        <td>${log.notes || ''}</td>
+                    </tr>`;
+                });
+                html += `</tbody></table>`;
+            } else {
+                html += `<p>No location changes recorded.</p>`;
+            }
+            frm.fields_dict.movements_html.$wrapper.html(html);
+        }
+    });
+}
         }
     );
 });
