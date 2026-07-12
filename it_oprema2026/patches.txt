@@ -1,4 +1,4 @@
 [pre_model_sync]
 
 [post_model_sync]
-it_oprema2026.patches.migrate_computer_to_device_group.execute
+it_oprema2026.patches.migrate_computer_to_device_group

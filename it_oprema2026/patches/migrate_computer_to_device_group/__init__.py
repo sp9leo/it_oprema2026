@@ -2,7 +2,6 @@ import frappe
 
 
 def execute():
-    """Migrate Computer records + Computer Device Link to Device Group Member on Device."""
     migrate_computers()
     migrate_computer_device_links()
     frappe.db.commit()
