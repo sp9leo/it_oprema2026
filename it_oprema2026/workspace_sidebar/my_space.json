@@ -20,14 +20,14 @@
    "hidden": 0,
    "idx": 2
   },
-  {
-   "type": "DocType",
-   "link_to": "Computer",
-   "label": "Computer",
-   "icon": "monitor",
-   "hidden": 0,
-   "idx": 3
-  },
+   {
+    "type": "DocType",
+    "link_to": "Network",
+    "label": "Network",
+    "icon": "globe",
+    "hidden": 0,
+    "idx": 3
+   },
   {
    "type": "DocType",
    "link_to": "Device Group",
@@ -116,14 +116,7 @@
    "hidden": 0,
    "idx": 14
   },
-  {
-   "type": "DocType",
-   "link_to": "Computer Device Link",
-   "label": "Computer Device Link",
-   "icon": "link",
-   "hidden": 0,
-   "idx": 15
-  },
+
   {
    "type": "DocType",
    "link_to": "Linked Location",

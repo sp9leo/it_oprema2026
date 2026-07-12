@@ -22,11 +22,35 @@
             <div class="flex justify-between py-1 border-b"><dt class="text-ink-gray-6">Serial</dt><dd>{{ detail.data.device.device_serial || '-' }}</dd></div>
             <div class="flex justify-between py-1 border-b"><dt class="text-ink-gray-6">Location</dt><dd>{{ detail.data.device.location || '-' }}</dd></div>
             <div class="flex justify-between py-1 border-b"><dt class="text-ink-gray-6">Company</dt><dd>{{ detail.data.device.company || '-' }}</dd></div>
-            <div class="flex justify-between py-1 border-b"><dt class="text-ink-gray-6">Computer</dt><dd>
+            <div class="flex justify-between py-1 border-b"><dt class="text-ink-gray-6">Group Leader</dt><dd>
               <Badge v-if="detail.data.device.is_computer" theme="cyan" size="sm">Yes</Badge>
               <Badge v-else theme="gray" size="sm">No</Badge>
             </dd></div>
+            <div v-if="detail.data.device.parent_device" class="flex justify-between py-1 border-b">
+              <dt class="text-ink-gray-6">Part of Group</dt>
+              <dd><a :href="'/app/device/' + detail.data.device.parent_device" class="text-blue-600 hover:underline">{{ detail.data.device.parent_device }}</a></dd>
+            </div>
           </dl>
+        </div>
+
+        <div v-if="detail.data.group_members?.length" class="rounded-lg border bg-surface-white p-4">
+          <h3 class="text-lg font-medium mb-3">Group Members ({{ detail.data.group_members.length }})</h3>
+          <table class="w-full text-sm">
+            <thead class="bg-surface-gray-1 text-ink-gray-6 text-left">
+              <tr>
+                <th class="px-4 py-2 font-medium">Device</th>
+                <th class="px-4 py-2 font-medium">Role</th>
+                <th class="px-4 py-2 font-medium">Attached On</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y">
+              <tr v-for="m in detail.data.group_members" :key="m.device" class="hover:bg-surface-gray-1">
+                <td class="px-4 py-2.5"><a :href="'/app/device/' + m.device" class="text-blue-600 hover:underline">{{ m.device }}</a></td>
+                <td class="px-4 py-2.5">{{ m.role }}</td>
+                <td class="px-4 py-2.5">{{ m.attached_on ? new Date(m.attached_on).toLocaleString() : '-' }}</td>
+              </tr>
+            </tbody>
+          </table>
         </div>
 
         <div class="rounded-lg border bg-surface-white p-4">

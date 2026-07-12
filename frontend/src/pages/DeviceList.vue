@@ -46,7 +46,8 @@
             <td class="px-4 py-2.5">{{ d.status }}</td>
             <td class="px-4 py-2.5">{{ d.location }}</td>
             <td class="px-4 py-2.5">
-              <Badge v-if="d.is_computer" theme="cyan" size="sm">Computer</Badge>
+              <Badge v-if="d.is_computer" theme="cyan" size="sm">Group Leader</Badge>
+              <Badge v-else-if="d.parent_device" theme="orange" size="sm">Member</Badge>
               <Badge v-else theme="blue" size="sm">Device</Badge>
             </td>
           </tr>

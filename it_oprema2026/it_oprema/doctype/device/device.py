@@ -3,33 +3,45 @@ from frappe.model.document import Document
 
 
 class Device(Document):
-    def on_update(self):
-        if self.computer_link:
-            existing = frappe.get_all(
-                "Computer Device Link",
-                filters={"computer_link": self.computer_link, "device_link": self.name}
-            )
-            if not existing:
-                frappe.get_doc({
-                    "doctype": "Computer Device Link",
-                    "computer_link": self.computer_link,
-                    "device_link": self.name
-                }).insert(ignore_permissions=True)
+    def validate(self):
+        self.validate_group_consistency()
+        self.update_member_parent_references()
 
-            comp_location = frappe.db.get_value("Device", self.computer_link, "location")
-            if comp_location:
-                frappe.db.set_value("Device", self.name, "location", comp_location)
-
-            self.add_comment("Info", f"Attached to Computer {self.computer_link}")
-            frappe.get_doc("Computer", self.computer_link).add_comment("Info", f"Device {self.name} attached")
-        else:
-            links = frappe.get_all(
-                "Computer Device Link",
-                filters={"device_link": self.name},
-                fields=["name", "computer_link"]
+    def validate_group_consistency(self):
+        if self.is_computer and self.parent_device:
+            frappe.throw(
+                frappe._("Device marked as computer cannot be a member of another group.")
             )
-            for link in links:
-                frappe.delete_doc("Computer Device Link", link.name, ignore_permissions=True)
-                comp = frappe.get_doc("Computer", link.computer_link)
-                comp.add_comment("Info", f"Device {self.name} detached")
-            self.add_comment("Info", "Detached from Computer")
+        if self.parent_device == self.name:
+            frappe.throw(frappe._("Device cannot be its own parent."))
+        if self.parent_device:
+            parent = frappe.get_doc("Device", self.parent_device)
+            if not parent.is_computer:
+                frappe.throw(
+                    frappe._("Parent device {0} is not marked as a computer.").format(self.parent_device)
+                )
+
+    def update_member_parent_references(self):
+        if not self.is_computer:
+            return
+        member_devices = set()
+        for row in self.get("device_group_members") or []:
+            if row.device:
+                member_devices.add(row.device)
+
+        for member_name in member_devices:
+            current_parent = frappe.db.get_value("Device", member_name, "parent_device")
+            if current_parent != self.name:
+                frappe.db.set_value("Device", member_name, "parent_device", self.name)
+
+        linked_to_me = frappe.get_all(
+            "Device Group Member",
+            filters={"parent": self.name},
+            fields=["device"]
+        )
+        current_members = {d.device for d in linked_to_me}
+        removed_members = current_members - member_devices
+        for removed in removed_members:
+            current_parent = frappe.db.get_value("Device", removed, "parent_device")
+            if current_parent == self.name:
+                frappe.db.set_value("Device", removed, "parent_device", None)

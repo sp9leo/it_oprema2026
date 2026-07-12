@@ -20,8 +20,8 @@
             <span class="i-lucide-monitor text-xl" />
           </div>
           <div>
-            <div class="text-2xl font-bold">{{ stats.data.total_computers }}</div>
-            <div class="text-sm text-ink-gray-5">Computers</div>
+            <div class="text-2xl font-bold">{{ stats.data.total_groups }}</div>
+            <div class="text-sm text-ink-gray-5">Groups</div>
           </div>
         </div>
         <div class="rounded-lg border bg-surface-white p-4 flex items-center gap-4">

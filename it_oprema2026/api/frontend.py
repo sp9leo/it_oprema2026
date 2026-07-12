@@ -10,7 +10,7 @@ def ping() -> dict:
 def get_dashboard_stats() -> dict:
     return {
         "total_devices": frappe.db.count("Device"),
-        "total_computers": frappe.db.count("Computer"),
+        "total_groups": frappe.db.count("Device", filters={"is_computer": 1}),
         "total_locations": frappe.db.count("Location"),
     }
 
@@ -27,7 +27,7 @@ def get_devices(
     devices = frappe.db.sql(
         f"""
         SELECT name, device_inventory_code, device_id, device_name, device_group,
-               status, location, company, device_serial, is_computer
+               status, location, company, device_serial, is_computer, parent_device
         FROM `tabDevice`
         WHERE 1=1 {conditions}
         ORDER BY modified DESC
@@ -48,9 +48,17 @@ def get_device_detail(name: str) -> dict:
         {"attached_to_doctype": "Device", "attached_to_name": name},
         ["name", "file_name", "file_url", "file_size"],
     )
+    group_members = []
+    if device.is_computer:
+        group_members = frappe.get_all(
+            "Device Group Member",
+            filters={"parent": name},
+            fields=["device", "role", "attached_on", "notes"],
+        )
     return {
         "device": device.as_dict(),
         "attachments": attachments,
+        "group_members": group_members,
     }
 
 
@@ -59,15 +67,18 @@ def get_computers(
     filters: str | None = None, limit: int = 50, offset: int = 0
 ) -> dict:
     filters_dict = frappe.parse_json(filters) if filters else {}
+    filters_dict["is_computer"] = 1
     conditions = ""
     for key, val in filters_dict.items():
         conditions += f" AND {key} = {frappe.db.escape(val)}"
 
     computers = frappe.db.sql(
         f"""
-        SELECT name, computer_name, computer_inventory_code, computer_id,
-               manufacturer, status, location, computer_admin, device_user
-        FROM `tabComputer`
+        SELECT name AS computer_name, device_inventory_code AS computer_inventory_code,
+               device_id AS computer_id, device_name, device_manufacturer AS manufacturer,
+               status, location, device_admin AS computer_admin, device_user,
+               device_serial AS computer_serial, parent_device
+        FROM `tabDevice`
         WHERE 1=1 {conditions}
         ORDER BY modified DESC
         LIMIT {int(limit)} OFFSET {int(offset)}
@@ -75,7 +86,7 @@ def get_computers(
         as_dict=True,
     )
 
-    total = frappe.db.count("Computer", filters_dict)
+    total = frappe.db.count("Device", {"is_computer": 1})
     return {"data": computers, "total": total}
 
 
@@ -118,56 +129,52 @@ def get_device_location_log(
 
 
 @frappe.whitelist()
-def attach_device(computer: str, device: str, force: bool = False) -> dict:
-    existing = frappe.get_all(
-        "Computer Device Link",
-        filters={"device_link": device},
-        fields=["name", "computer_link"],
-    )
-    if existing:
-        current_computer = existing[0].computer_link
-        if current_computer != computer and not force:
-            return {
-                "ok": False,
-                "warning": f"Device {device} is already attached to Computer {current_computer}.",
-            }
-        if current_computer != computer:
-            frappe.delete_doc("Computer Device Link", existing[0].name, ignore_permissions=True)
-            frappe.db.set_value("Device", device, "computer_link", None)
-            frappe.get_doc("Computer", current_computer).add_comment(
-                "Info", f"Device {device} detached (re-attached to {computer})."
-            )
+def attach_device(group_leader: str, member_device: str, role: str = "Other", force: bool = False) -> dict:
+    leader_doc = frappe.get_doc("Device", group_leader)
+    if not leader_doc.is_computer:
+        return {"ok": False, "warning": f"Device {group_leader} is not marked as a computer group."}
 
-    frappe.get_doc({
-        "doctype": "Computer Device Link",
-        "computer_link": computer,
-        "device_link": device,
+    existing_member = frappe.db.get_value("Device Group Member", {"device": member_device}, "parent")
+    if existing_member:
+        if existing_member == group_leader:
+            return {"ok": False, "warning": f"Device {member_device} is already in this group."}
+        if not force:
+            return {"ok": False, "warning": f"Device {member_device} is already a member of group {existing_member}."}
+        frappe.db.delete("Device Group Member", {"device": member_device})
+        frappe.db.set_value("Device", member_device, "parent_device", None)
+
+    row = leader_doc.append("device_group_members", {
+        "device": member_device,
+        "role": role,
         "attached_on": frappe.utils.now_datetime(),
-    }).insert(ignore_permissions=True)
-    frappe.db.set_value("Device", device, "computer_link", computer)
+    })
+    leader_doc.save(ignore_permissions=True)
 
-    comp_location = frappe.db.get_value("Computer", computer, "location")
-    if comp_location:
-        frappe.db.set_value("Device", device, "location", comp_location)
+    leader_location = frappe.db.get_value("Device", group_leader, "location")
+    if leader_location:
+        frappe.db.set_value("Device", member_device, "location", leader_location)
 
-    return {"ok": True, "message": f"Device {device} attached to Computer {computer}"}
+    frappe.db.set_value("Device", member_device, "parent_device", group_leader)
+    frappe.get_doc("Device", group_leader).add_comment("Info", f"Device {member_device} attached as {role}.")
+    frappe.get_doc("Device", member_device).add_comment("Info", f"Attached to group {group_leader} as {role}.")
+    return {"ok": True, "message": f"Device {member_device} attached to group {group_leader} as {role}."}
 
 
 @frappe.whitelist()
-def detach_device(computer: str, device: str) -> dict:
-    existing = frappe.get_all(
-        "Computer Device Link",
-        filters={"computer_link": computer, "device_link": device},
-        fields=["name"],
+def detach_device(group_leader: str, member_device: str) -> dict:
+    existing = frappe.db.get_value(
+        "Device Group Member",
+        {"parent": group_leader, "device": member_device},
+        "name"
     )
     if not existing:
-        return {"ok": False, "warning": f"Device {device} is not attached to Computer {computer}."}
+        return {"ok": False, "warning": f"Device {member_device} is not a member of group {group_leader}."}
 
-    frappe.delete_doc("Computer Device Link", existing[0].name, ignore_permissions=True)
-    frappe.db.set_value("Device", device, "computer_link", None)
-    frappe.db.set_value("Device", device, "location", None)
-    frappe.get_doc("Computer", computer).add_comment("Info", f"Device {device} detached.")
-    return {"ok": True, "message": f"Device {device} detached from Computer {computer}"}
+    frappe.db.delete("Device Group Member", {"name": existing})
+    frappe.db.set_value("Device", member_device, "parent_device", None)
+    frappe.get_doc("Device", group_leader).add_comment("Info", f"Device {member_device} detached.")
+    frappe.get_doc("Device", member_device).add_comment("Info", f"Detached from group {group_leader}.")
+    return {"ok": True, "message": f"Device {member_device} detached from group {group_leader}."}
 
 
 @frappe.whitelist()
