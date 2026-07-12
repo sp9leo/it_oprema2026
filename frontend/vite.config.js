@@ -15,24 +15,29 @@ function getBenchPath() {
   }
 }
 
-function getAppsSiteMap() {
-  const output = execFileSync(
-    "bench",
-    ["--site", "all", "list-apps", "--format", "json"],
-    {
-      cwd: getBenchPath(),
-      stdio: ["ignore", "pipe", fs.openSync("/dev/null", "w")],
-      encoding: "utf-8"
+function tryDetectSite() {
+  try {
+    const benchPath = getBenchPath()
+    if (!benchPath) return null
+    const output = execFileSync(
+      "bench",
+      ["--site", "all", "list-apps", "--format", "json"],
+      {
+        cwd: benchPath,
+        stdio: ["ignore", "pipe", fs.openSync("/dev/null", "w")],
+        encoding: "utf-8",
+        timeout: 5000,
+      }
+    )
+    const sites = JSON.parse(output)
+    const app_name = path.basename(path.dirname(path.resolve(process.cwd())))
+    for (const info of sites) {
+      if (info.apps.includes(app_name)) {
+        return info.site
+      }
     }
-  )
-  return JSON.parse(output)
-}
-
-function getCurrentSite(sites, app_name){
-  for (const info of sites) {
-    if (info.apps.includes(app_name)) {
-      return info.site
-    }
+  } catch (e) {
+    // bench not available or no site found — dev server still works
   }
   return null
 }
@@ -55,16 +60,17 @@ export default defineConfig({
       name: 'custom-start-message',
       configureServer(server) {
         server.httpServer?.once('listening', () => {
-          let sites = getAppsSiteMap()
-          let app_name = path.basename(path.dirname(path.resolve(process.cwd())))
-          let currentSite = getCurrentSite(sites, app_name)
-          if (currentSite) {
+          const site = tryDetectSite()
+          if (site) {
             const info = server.config.server
             const url = new URL("http://localhost")
-            url.hostname = currentSite
+            url.hostname = site
             url.port = info.port
             url.pathname = "/it_oprema2026"
             console.log("Open in Browser: " + url.href)
+          } else {
+            const info = server.config.server
+            console.log(`Vite dev server running at http://localhost:${info.port}/it_oprema2026`)
           }
         })
       }
@@ -82,7 +88,6 @@ export default defineConfig({
   optimizeDeps: {
     include: [
       'frappe-ui > feather-icons',
-      'showdown',
       'tailwind.config.js',
       'engine.io-client',
       'highlight.js/lib/core',
