@@ -20,6 +20,11 @@ class Device(Document):
                 frappe.throw(
                     frappe._("Parent device {0} is not marked as a computer.").format(self.parent_device)
                 )
+        for row in self.get("device_group_members") or []:
+            if row.device == self.name:
+                frappe.throw(
+                    frappe._("Device {0} cannot be added as a member of itself.").format(self.name)
+                )
 
     def update_member_parent_references(self):
         if not self.is_computer:
