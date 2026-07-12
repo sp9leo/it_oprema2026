@@ -1,14 +1,165 @@
 {
- "app": "it_oprema",
+ "app": "it_oprema2026",
  "creation": "2026-01-10 12:18:54.827162",
  "docstatus": 0,
  "doctype": "Workspace Sidebar",
  "idx": 0,
- "items": [],
+ "items": [
+  {
+   "type": "Card Break",
+   "label": "IT Oprema",
+   "icon": "device-hub",
+   "hidden": 0,
+   "idx": 1
+  },
+  {
+   "type": "DocType",
+   "link_to": "Device",
+   "label": "Device",
+   "icon": "device-hub",
+   "hidden": 0,
+   "idx": 2
+  },
+  {
+   "type": "DocType",
+   "link_to": "Computer",
+   "label": "Computer",
+   "icon": "monitor",
+   "hidden": 0,
+   "idx": 3
+  },
+  {
+   "type": "DocType",
+   "link_to": "Device Group",
+   "label": "Device Group",
+   "icon": "folder",
+   "hidden": 0,
+   "idx": 4
+  },
+  {
+   "type": "DocType",
+   "link_to": "Location",
+   "label": "Location",
+   "icon": "map-pin",
+   "hidden": 0,
+   "idx": 5
+  },
+  {
+   "type": "DocType",
+   "link_to": "Enota",
+   "label": "Enota",
+   "icon": "building",
+   "hidden": 0,
+   "idx": 6
+  },
+  {
+   "type": "DocType",
+   "link_to": "Device Movement",
+   "label": "Device Movement",
+   "icon": "move",
+   "hidden": 0,
+   "idx": 7
+  },
+  {
+   "type": "DocType",
+   "link_to": "Dogodki",
+   "label": "Dogodki",
+   "icon": "calendar",
+   "hidden": 0,
+   "idx": 8
+  },
+  {
+   "type": "DocType",
+   "link_to": "Bookable Items",
+   "label": "Bookable Items",
+   "icon": "book",
+   "hidden": 0,
+   "idx": 9
+  },
+  {
+   "type": "DocType",
+   "link_to": "IP Address",
+   "label": "IP Address",
+   "icon": "globe",
+   "hidden": 0,
+   "idx": 10
+  },
+  {
+   "type": "DocType",
+   "link_to": "IT-Manufacturer",
+   "label": "IT-Manufacturer",
+   "icon": "briefcase",
+   "hidden": 0,
+   "idx": 11
+  },
+  {
+   "type": "DocType",
+   "link_to": "IT-Device Manufacturer",
+   "label": "IT-Device Manufacturer",
+   "icon": "briefcase",
+   "hidden": 0,
+   "idx": 12
+  },
+  {
+   "type": "DocType",
+   "link_to": "IT-Status",
+   "label": "IT-Status",
+   "icon": "tag",
+   "hidden": 0,
+   "idx": 13
+  },
+  {
+   "type": "DocType",
+   "link_to": "Device IP Link",
+   "label": "Device IP Link",
+   "icon": "link",
+   "hidden": 0,
+   "idx": 14
+  },
+  {
+   "type": "DocType",
+   "link_to": "Computer Device Link",
+   "label": "Computer Device Link",
+   "icon": "link",
+   "hidden": 0,
+   "idx": 15
+  },
+  {
+   "type": "DocType",
+   "link_to": "Linked Location",
+   "label": "Linked Location",
+   "icon": "map-pin",
+   "hidden": 0,
+   "idx": 16
+  },
+  {
+   "type": "DocType",
+   "link_to": "Device Movement Item",
+   "label": "Device Movement Item",
+   "icon": "move",
+   "hidden": 0,
+   "idx": 17
+  },
+  {
+   "type": "Card Break",
+   "label": "Device Loan",
+   "icon": "hand",
+   "hidden": 0,
+   "idx": 18
+  },
+  {
+   "type": "DocType",
+   "link_to": "Device Loan",
+   "label": "Device Loan",
+   "icon": "hand",
+   "hidden": 0,
+   "idx": 19
+  }
+ ],
  "modified": "2026-01-10 12:18:54.827162",
  "modified_by": "Administrator",
  "name": "my space",
  "owner": "Administrator",
- "standard": 0,
- "title": "my space"
+ "standard": 1,
+ "title": "IT Oprema 2026"
 }

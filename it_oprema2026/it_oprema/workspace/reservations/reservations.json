@@ -1,23 +1,160 @@
 {
  "app": "it_oprema2026",
  "charts": [],
- "content": "[{\"id\":\"CZ5SZu3PBY\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">Izposoje</span>\",\"col\":12}},{\"id\":\"ZS7hdE0oxT\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Device Loan\",\"col\":3}}]",
+ "content": "[{\"id\":\"nPeYxlB4aS\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">Izposoje</span>\",\"col\":12}},{\"id\":\"gK7jM2pR1q\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Device Loan\",\"col\":3}},{\"id\":\"hL8kN3qS2r\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Device\",\"col\":3}},{\"id\":\"iM9lO4rT3s\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Computer\",\"col\":3}},{\"id\":\"jN0mP5sU4t\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Location\",\"col\":3}}]",
  "creation": "2026-01-10 12:13:37.465697",
  "custom_blocks": [],
  "docstatus": 0,
  "doctype": "Workspace",
  "for_user": "",
  "hide_custom": 0,
- "icon": "grid",
+ "icon": "device-hub",
  "idx": 0,
- "indicator_color": "green",
+ "indicator_color": "blue",
  "is_hidden": 0,
  "label": "Izposoje",
  "link_type": "DocType",
- "links": [],
+ "links": [
+  {
+   "type": "DocType",
+   "link_to": "Device",
+   "label": "Device",
+   "hidden": 0,
+   "is_query_report": 0,
+   "idx": 1
+  },
+  {
+   "type": "DocType",
+   "link_to": "Computer",
+   "label": "Computer",
+   "hidden": 0,
+   "is_query_report": 0,
+   "idx": 2
+  },
+  {
+   "type": "DocType",
+   "link_to": "Device Group",
+   "label": "Device Group",
+   "hidden": 0,
+   "is_query_report": 0,
+   "idx": 3
+  },
+  {
+   "type": "DocType",
+   "link_to": "Location",
+   "label": "Location",
+   "hidden": 0,
+   "is_query_report": 0,
+   "idx": 4
+  },
+  {
+   "type": "DocType",
+   "link_to": "Enota",
+   "label": "Enota",
+   "hidden": 0,
+   "is_query_report": 0,
+   "idx": 5
+  },
+  {
+   "type": "DocType",
+   "link_to": "Device Movement",
+   "label": "Device Movement",
+   "hidden": 0,
+   "is_query_report": 0,
+   "idx": 6
+  },
+  {
+   "type": "DocType",
+   "link_to": "Dogodki",
+   "label": "Dogodki",
+   "hidden": 0,
+   "is_query_report": 0,
+   "idx": 7
+  },
+  {
+   "type": "DocType",
+   "link_to": "Bookable Items",
+   "label": "Bookable Items",
+   "hidden": 0,
+   "is_query_report": 0,
+   "idx": 8
+  },
+  {
+   "type": "DocType",
+   "link_to": "IP Address",
+   "label": "IP Address",
+   "hidden": 0,
+   "is_query_report": 0,
+   "idx": 9
+  },
+  {
+   "type": "DocType",
+   "link_to": "IT-Manufacturer",
+   "label": "IT-Manufacturer",
+   "hidden": 0,
+   "is_query_report": 0,
+   "idx": 10
+  },
+  {
+   "type": "DocType",
+   "link_to": "IT-Device Manufacturer",
+   "label": "IT-Device Manufacturer",
+   "hidden": 0,
+   "is_query_report": 0,
+   "idx": 11
+  },
+  {
+   "type": "DocType",
+   "link_to": "IT-Status",
+   "label": "IT-Status",
+   "hidden": 0,
+   "is_query_report": 0,
+   "idx": 12
+  },
+  {
+   "type": "DocType",
+   "link_to": "Device IP Link",
+   "label": "Device IP Link",
+   "hidden": 0,
+   "is_query_report": 0,
+   "idx": 13
+  },
+  {
+   "type": "DocType",
+   "link_to": "Computer Device Link",
+   "label": "Computer Device Link",
+   "hidden": 0,
+   "is_query_report": 0,
+   "idx": 14
+  },
+  {
+   "type": "DocType",
+   "link_to": "Linked Location",
+   "label": "Linked Location",
+   "hidden": 0,
+   "is_query_report": 0,
+   "idx": 15
+  },
+  {
+   "type": "DocType",
+   "link_to": "Device Movement Item",
+   "label": "Device Movement Item",
+   "hidden": 0,
+   "is_query_report": 0,
+   "idx": 16
+  },
+  {
+   "type": "DocType",
+   "link_to": "Device Loan",
+   "label": "Device Loan",
+   "hidden": 0,
+   "is_query_report": 0,
+   "idx": 17
+  }
+ ],
  "modified": "2026-01-21 17:29:20.892959",
  "modified_by": "Administrator",
- "module": "IT_Oprema",
+ "module": "IT Oprema",
  "name": "reservations",
  "number_cards": [],
  "owner": "Administrator",
@@ -32,10 +169,34 @@
  "sequence_id": 28.0,
  "shortcuts": [
   {
-   "color": "Grey",
+   "color": "Blue",
    "doc_view": "List",
-    "label": "Device Loan",
-    "link_to": "Device Loan",
+   "label": "Device Loan",
+   "link_to": "Device Loan",
+   "stats_filter": "[]",
+   "type": "DocType"
+  },
+  {
+   "color": "Cyan",
+   "doc_view": "List",
+   "label": "Device",
+   "link_to": "Device",
+   "stats_filter": "[]",
+   "type": "DocType"
+  },
+  {
+   "color": "Green",
+   "doc_view": "List",
+   "label": "Computer",
+   "link_to": "Computer",
+   "stats_filter": "[]",
+   "type": "DocType"
+  },
+  {
+   "color": "Orange",
+   "doc_view": "List",
+   "label": "Location",
+   "link_to": "Location",
    "stats_filter": "[]",
    "type": "DocType"
   }
