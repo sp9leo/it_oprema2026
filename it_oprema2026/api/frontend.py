@@ -24,10 +24,19 @@ def get_devices(
     for key, val in filters_dict.items():
         conditions += f" AND {key} = {frappe.db.escape(val)}"
 
+    column_exists = frappe.db.has_column("Device", "current_location")
+    select_fields = """
+        name, device_inventory_code, device_id, device_name, device_group,
+        status, company, device_serial, is_computer
+    """
+    if column_exists:
+        select_fields += ", location, current_location"
+    else:
+        select_fields += ", location"
+
     devices = frappe.db.sql(
         f"""
-        SELECT name, device_inventory_code, device_id, device_name, device_group,
-               status, location, current_location, company, device_serial, is_computer
+        SELECT {select_fields}
         FROM `tabDevice`
         WHERE 1=1 {conditions}
         ORDER BY modified DESC
@@ -37,6 +46,11 @@ def get_devices(
     )
 
     total = frappe.db.count("Device", filters_dict)
+
+    if not column_exists:
+        for d in devices:
+            d["current_location"] = None
+
     return {"data": devices, "total": total}
 
 

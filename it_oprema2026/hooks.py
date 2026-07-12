@@ -32,15 +32,25 @@ require_type_annotated_api_methods = True
 custom_fields = {
     "Device": [
         {
-            "fieldname": "current_location",
+            "fieldname": "location",
             "fieldtype": "Link",
-            "insert_after": "location",
             "in_list_view": 1,
             "in_standard_filter": 1,
+            "insert_after": "status",
+            "label": "Location",
+            "options": "Location",
+            "search_index": 1,
+        },
+        {
+            "fieldname": "current_location",
+            "fieldtype": "Link",
+            "in_list_view": 1,
+            "in_standard_filter": 1,
+            "insert_after": "location",
             "label": "Current Location",
             "options": "Location",
             "search_index": 1,
-        }
+        },
     ]
 }
 
