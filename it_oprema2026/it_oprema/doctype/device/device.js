@@ -29,7 +29,7 @@ frappe.ui.form.on('Device', {
                     args: {
                         doctype: "IP Address",
                         filters: { name: ["in", ip_names] },
-                        fields: ["name", "ip_address", "status"]
+                        fields: ["name", "ip_address", "network", "status"]
                     },
                     callback: function(res2) {
                         let ip_docs = {};
@@ -49,6 +49,7 @@ frappe.ui.form.on('Device', {
                                     <tr>
                                         <th>IP Address</th>
                                         <th>Status</th>
+                                        <th>Network</th>
                                         <th>Attached On</th>
                                         <th>Notes</th>
                                         <th>Action</th>
@@ -68,6 +69,7 @@ frappe.ui.form.on('Device', {
                                 <tr>
                                     <td><a href="/app/ip-address/${link.ip_address_link}">${ip_doc.ip_address || link.ip_address_link}</a></td>
                                     <td><span style="color:${status_color}; font-weight:bold;">● ${ip_doc.status || ''}</span></td>
+                                    <td>${ip_doc.network || '-'}</td>
                                     <td>${link.attached_on ? moment(link.attached_on).format("YYYY-MM-DD HH:mm:ss") : ''}</td>
                                     <td>${link.notes || ''}</td>
                                     <td>
@@ -113,7 +115,7 @@ frappe.ui.form.on('Device', {
                                     get_query: () => {
                                         return {
                                             filters: [
-                                                ["IP Address", "device_link", "is", "not set"]
+                                                ["IP Address", "is_linked", "=", 0]
                                             ]
                                         };
                                     }

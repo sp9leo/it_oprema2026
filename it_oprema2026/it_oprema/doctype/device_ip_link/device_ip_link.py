@@ -18,6 +18,6 @@ class DeviceIPLink(Document):
         for row in existing:
             if row.name != self.name and row.device_link != self.device_link:
                 frappe.throw(
-                    f"IP {self.ip_address_link} is already attached to Computer {row.device_link}. "
-                    "An IP address can only be attached to one computer."
+                    f"IP {self.ip_address_link} is already attached to Device {row.device_link}. "
+                    "An IP address can only be attached to one device."
                 )

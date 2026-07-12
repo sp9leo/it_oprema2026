@@ -77,6 +77,10 @@ def attach_ip(device_link, ip_address_link, force=False):
         "attached_on": now_datetime()
     })
     doc.insert(ignore_permissions=True)
+    frappe.db.set_value("IP Address", ip_address_link, {
+        "is_linked": 1,
+        "device_link": device_link,
+    })
     frappe.get_doc("Device", device_link).add_comment("Info", f"IP {ip_address_link} attached.")
     frappe.get_doc("IP Address", ip_address_link).add_comment("Info", f"Attached to Device {device_link}.")
     return {"ok": True, "message": f"IP {ip_address_link} attached to Device {device_link}"}
@@ -84,6 +88,10 @@ def attach_ip(device_link, ip_address_link, force=False):
 @frappe.whitelist()
 def detach_ip(device_link, ip_address_link):
     frappe.db.delete("Device IP Link", {"device_link": device_link, "ip_address_link": ip_address_link})
+    frappe.db.set_value("IP Address", ip_address_link, {
+        "is_linked": 0,
+        "device_link": None,
+    })
     frappe.get_doc("Device", device_link).add_comment("Info", f"IP {ip_address_link} detached.")
     frappe.get_doc("IP Address", ip_address_link).add_comment("Info", f"Detached from Device {device_link}.")
     return {"ok": True, "message": f"IP {ip_address_link} detached from Device {device_link}"}

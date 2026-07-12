@@ -4,41 +4,49 @@
  "creation": "2025-12-15 08:18:05.414614",
  "doctype": "DocType",
  "engine": "InnoDB",
- "field_order": [
-  "device_link",
-  "ip_address_link",
-  "attached_on",
-  "notes",
-  "ip_address"
- ],
- "fields": [
-  {
-   "fieldname": "ip_address_link",
-   "fieldtype": "Link",
-   "options": "IP Address",
-   "unique": 1
-  },
-  {
-   "fieldname": "attached_on",
-   "fieldtype": "Datetime"
-  },
-  {
-   "fieldname": "notes",
-   "fieldtype": "Small Text"
-  },
-  {
-   "fieldname": "device_link",
-   "fieldtype": "Link",
-   "options": "Device"
-  },
-  {
-   "fetch_from": "ip_address_link.ip_address",
-   "fieldname": "ip_address",
-   "fieldtype": "Data",
-   "label": "ip",
-   "read_only": 1
-  }
- ],
+  "field_order": [
+   "device_link",
+   "ip_address_link",
+   "attached_on",
+   "notes",
+   "ip_address",
+   "network"
+  ],
+  "fields": [
+   {
+    "fieldname": "ip_address_link",
+    "fieldtype": "Link",
+    "options": "IP Address",
+    "unique": 1
+   },
+   {
+    "fieldname": "attached_on",
+    "fieldtype": "Datetime"
+   },
+   {
+    "fieldname": "notes",
+    "fieldtype": "Small Text"
+   },
+   {
+    "fieldname": "device_link",
+    "fieldtype": "Link",
+    "options": "Device"
+   },
+   {
+    "fetch_from": "ip_address_link.ip_address",
+    "fieldname": "ip_address",
+    "fieldtype": "Data",
+    "label": "ip",
+    "read_only": 1
+   },
+   {
+    "fetch_from": "ip_address_link.network",
+    "fieldname": "network",
+    "fieldtype": "Data",
+    "label": "Network",
+    "read_only": 1
+   }
+  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
