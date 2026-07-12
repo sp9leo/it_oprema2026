@@ -21,7 +21,6 @@
             <div class="flex justify-between py-1 border-b"><dt class="text-ink-gray-6">Group</dt><dd>{{ detail.data.device.device_group }}</dd></div>
             <div class="flex justify-between py-1 border-b"><dt class="text-ink-gray-6">Serial</dt><dd>{{ detail.data.device.device_serial || '-' }}</dd></div>
             <div class="flex justify-between py-1 border-b"><dt class="text-ink-gray-6">Location</dt><dd>{{ detail.data.device.location || '-' }}</dd></div>
-            <div class="flex justify-between py-1 border-b"><dt class="text-ink-gray-6">Current Location</dt><dd>{{ detail.data.device.current_location || '-' }}</dd></div>
             <div class="flex justify-between py-1 border-b"><dt class="text-ink-gray-6">Company</dt><dd>{{ detail.data.device.company || '-' }}</dd></div>
             <div class="flex justify-between py-1 border-b"><dt class="text-ink-gray-6">Computer</dt><dd>
               <Badge v-if="detail.data.device.is_computer" theme="cyan" size="sm">Yes</Badge>

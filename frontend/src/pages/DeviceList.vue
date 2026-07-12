@@ -30,7 +30,6 @@
             <th class="px-4 py-2 font-medium">Group</th>
             <th class="px-4 py-2 font-medium">Status</th>
             <th class="px-4 py-2 font-medium">Location</th>
-            <th class="px-4 py-2 font-medium">Current Location</th>
             <th class="px-4 py-2 font-medium">Type</th>
           </tr>
         </thead>
@@ -46,7 +45,6 @@
             <td class="px-4 py-2.5">{{ d.device_group }}</td>
             <td class="px-4 py-2.5">{{ d.status }}</td>
             <td class="px-4 py-2.5">{{ d.location }}</td>
-            <td class="px-4 py-2.5">{{ d.current_location || '-' }}</td>
             <td class="px-4 py-2.5">
               <Badge v-if="d.is_computer" theme="cyan" size="sm">Computer</Badge>
               <Badge v-else theme="blue" size="sm">Device</Badge>

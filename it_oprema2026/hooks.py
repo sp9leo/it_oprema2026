@@ -29,21 +29,6 @@ scheduler_events = {
 export_python_type_annotations = True
 require_type_annotated_api_methods = True
 
-custom_fields = {
-    "Device": [
-        {
-            "fieldname": "current_location",
-            "fieldtype": "Link",
-            "in_list_view": 1,
-            "in_standard_filter": 1,
-            "insert_after": "status",
-            "label": "Current Location",
-            "options": "Location",
-            "search_index": 1,
-        },
-    ]
-}
-
 doc_events = {
     "Device": {
         "before_save": "it_oprema2026.overrides.device.before_save",

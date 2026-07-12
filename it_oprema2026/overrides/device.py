@@ -2,11 +2,11 @@ import frappe
 
 
 def before_save(doc, method):
-    if doc.is_new() or not hasattr(doc, "current_location"):
+    if doc.is_new() or not hasattr(doc, "location"):
         return
 
-    old_location = frappe.db.get_value("Device", doc.name, "current_location")
-    new_location = doc.current_location
+    old_location = frappe.db.get_value("Device", doc.name, "location")
+    new_location = doc.location
 
     if old_location != new_location:
         log = frappe.get_doc(
