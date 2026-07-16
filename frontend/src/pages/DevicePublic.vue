@@ -55,17 +55,33 @@
           <div class="text-sm text-gray-900">{{ device.location || 'Not assigned' }}</div>
         </div>
 
-        <div class="bg-white rounded-xl px-4 py-3 shadow-sm border">
+        <div v-if="device.is_computer" class="bg-white rounded-xl px-4 py-3 shadow-sm border">
+          <div class="flex items-center gap-2 mb-3">
+            <span class="px-2.5 py-1 text-sm rounded-full bg-cyan-100 text-cyan-700">Group Leader</span>
+          </div>
+          <div v-if="device.group_members?.length">
+            <div class="text-xs font-medium text-gray-400 uppercase tracking-wider mb-2">Members ({{ device.group_members.length }})</div>
+            <div class="space-y-2">
+              <div v-for="m in device.group_members" :key="m.device" class="flex items-center justify-between text-sm">
+                <span class="text-gray-900">{{ m.device }}</span>
+                <span class="text-xs text-gray-500">{{ m.role || '-' }}</span>
+              </div>
+            </div>
+          </div>
+          <div v-else class="text-sm text-gray-500">No members</div>
+        </div>
+
+        <div v-else-if="device.parent_device" class="bg-white rounded-xl px-4 py-3 shadow-sm border">
+          <div class="text-xs font-medium text-gray-400 uppercase tracking-wider mb-2">Part of Group</div>
+          <div class="flex items-center gap-2 mb-2">
+            <span class="px-2.5 py-1 text-sm rounded-full bg-orange-100 text-orange-700">Member</span>
+          </div>
+          <div class="text-sm text-gray-900">{{ device.parent_device }}</div>
+        </div>
+
+        <div v-else class="bg-white rounded-xl px-4 py-3 shadow-sm border">
           <div class="text-xs font-medium text-gray-400 uppercase tracking-wider mb-2">Type</div>
-          <div class="flex items-center gap-2">
-            <span v-if="device.is_computer" class="px-2.5 py-1 text-sm rounded-full bg-cyan-100 text-cyan-700">Group Leader</span>
-            <span v-else-if="device.parent_device" class="px-2.5 py-1 text-sm rounded-full bg-orange-100 text-orange-700">Member</span>
-            <span v-else class="px-2.5 py-1 text-sm rounded-full bg-blue-100 text-blue-700">Device</span>
-          </div>
-          <div v-if="device.parent_device" class="mt-2 text-sm">
-            <span class="text-gray-500">Part of:</span>
-            <span class="text-gray-900 ml-1">{{ device.parent_device }}</span>
-          </div>
+          <span class="px-2.5 py-1 text-sm rounded-full bg-blue-100 text-blue-700">Device</span>
         </div>
       </div>
 

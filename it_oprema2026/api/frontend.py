@@ -9,7 +9,7 @@ def ping() -> dict:
 @frappe.whitelist(allow_guest=True)
 def get_device_public_info(name: str) -> dict:
     device = frappe.get_doc("Device", name)
-    return {
+    result = {
         "name": device.name,
         "device_inventory_code": device.device_inventory_code,
         "device_id": device.device_id,
@@ -23,6 +23,13 @@ def get_device_public_info(name: str) -> dict:
         "is_computer": device.is_computer,
         "parent_device": device.parent_device,
     }
+    if device.is_computer:
+        result["group_members"] = frappe.get_all(
+            "Device Group Member",
+            filters={"parent": name},
+            fields=["device", "role", "notes"],
+        )
+    return result
 
 
 @frappe.whitelist()
