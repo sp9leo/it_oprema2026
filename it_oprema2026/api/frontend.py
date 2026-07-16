@@ -231,3 +231,130 @@ def detach_ip(device: str, ip_address: str) -> dict:
     frappe.get_doc("Device", device).add_comment("Info", f"IP {ip_address} detached.")
     frappe.get_doc("IP Address", ip_address).add_comment("Info", f"Detached from Device {device}.")
     return {"ok": True, "message": f"IP {ip_address} detached from Device {device}"}
+
+
+@frappe.whitelist()
+def get_inventory_checks() -> list:
+    checks = frappe.db.sql(
+        """
+        SELECT name, title, date, status, total_devices, checked_devices
+        FROM `tabInventory Check`
+        ORDER BY creation DESC
+        """,
+        as_dict=True,
+    )
+    return checks
+
+
+@frappe.whitelist()
+def get_inventory_check_detail(name: str) -> dict:
+    doc = frappe.get_doc("Inventory Check", name)
+    return doc.as_dict()
+
+
+@frappe.whitelist()
+def create_inventory_check(
+    title: str,
+    date: str,
+    device_group: str | None = None,
+    location: str | None = None,
+) -> dict:
+    conditions = "1=1"
+    if device_group:
+        conditions += f" AND device_group = {frappe.db.escape(device_group)}"
+    if location:
+        conditions += f" AND location = {frappe.db.escape(location)}"
+
+    devices = frappe.db.sql(
+        f"""
+        SELECT name, device_name, device_inventory_code, device_group, location
+        FROM `tabDevice`
+        WHERE {conditions}
+        ORDER BY name ASC
+        """,
+        as_dict=True,
+    )
+
+    doc = frappe.get_doc({
+        "doctype": "Inventory Check",
+        "title": title,
+        "date": date,
+        "status": "In Progress",
+        "device_group": device_group or "",
+        "location": location or "",
+        "total_devices": len(devices),
+        "checked_devices": 0,
+        "items": [
+            {
+                "device": d.name,
+                "device_name": d.device_name,
+                "device_inventory_code": d.device_inventory_code,
+                "device_group": d.device_group,
+                "location": d.location,
+            }
+            for d in devices
+        ],
+    })
+    doc.insert(ignore_permissions=True)
+    return doc.as_dict()
+
+
+@frappe.whitelist()
+def update_inventory_item(
+    check_name: str,
+    device: str,
+    check_status: str,
+    checked_by: str = "",
+    notes: str = "",
+) -> dict:
+    doc = frappe.get_doc("Inventory Check", check_name)
+    for item in doc.items:
+        if item.device == device:
+            item.check_status = check_status
+            item.checked_by = checked_by
+            item.checked_on = frappe.utils.now_datetime()
+            item.notes = notes
+            break
+
+    doc.save(ignore_permissions=True)
+    return {"ok": True}
+
+
+@frappe.whitelist()
+def complete_inventory_check(name: str) -> dict:
+    doc = frappe.get_doc("Inventory Check", name)
+    doc.status = "Completed"
+    doc.save(ignore_permissions=True)
+    return {"ok": True}
+
+
+@frappe.whitelist()
+def get_device_inventory_history(device: str) -> list:
+    items = frappe.db.sql(
+        """
+        SELECT parent AS check_name, check_status, checked_by, checked_on, notes
+        FROM `tabInventory Check Item`
+        WHERE device = %s AND check_status != 'Pending'
+        ORDER BY checked_on DESC
+        """,
+        device,
+        as_dict=True,
+    )
+
+    check_names = list({i.check_name for i in items})
+    checks = {}
+    if check_names:
+        rows = frappe.db.sql(
+            "SELECT name, title, date FROM `tabInventory Check` WHERE name IN %s",
+            [check_names],
+            as_dict=True,
+        )
+        for r in rows:
+            checks[r.name] = r
+
+    for item in items:
+        c = checks.get(item.check_name, {})
+        item["check_title"] = c.get("title", "")
+        item["check_date"] = c.get("date", "")
+
+    return items

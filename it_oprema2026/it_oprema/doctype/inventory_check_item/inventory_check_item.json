@@ -1,0 +1,104 @@
+{
+ "actions": [],
+ "creation": "2026-07-16 00:00:00.000000",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "device",
+  "device_name",
+  "device_inventory_code",
+  "device_group",
+  "location",
+  "column_break_1",
+  "check_status",
+  "checked_by",
+  "checked_on",
+  "section_break_notes",
+  "notes"
+ ],
+ "fields": [
+  {
+   "fieldname": "device",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Device",
+   "options": "Device",
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "fetch_from": "device.device_name",
+   "fieldname": "device_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Device Name",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "device.device_inventory_code",
+   "fieldname": "device_inventory_code",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Inventory Code",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "device.device_group",
+   "fieldname": "device_group",
+   "fieldtype": "Data",
+   "label": "Group",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "device.location",
+   "fieldname": "location",
+   "fieldtype": "Data",
+   "label": "Location",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Pending",
+   "fieldname": "check_status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Check Status",
+   "options": "Pending\nOK\nFaulty\nMissing"
+  },
+  {
+   "fieldname": "checked_by",
+   "fieldtype": "Data",
+   "label": "Checked By"
+  },
+  {
+   "fieldname": "checked_on",
+   "fieldtype": "Datetime",
+   "label": "Checked On"
+  },
+  {
+   "fieldname": "section_break_notes",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "notes",
+   "fieldtype": "Small Text",
+   "label": "Notes"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-07-16 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "IT_Oprema",
+ "name": "Inventory Check Item",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

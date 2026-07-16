@@ -45,6 +45,16 @@ const routes = [
     component: () => import('@/pages/LoanDetail.vue'),
   },
   {
+    path: '/inventory',
+    name: 'InventoryList',
+    component: () => import('@/pages/InventoryList.vue'),
+  },
+  {
+    path: '/inventory/:id',
+    name: 'InventoryDetail',
+    component: () => import('@/pages/InventoryDetail.vue'),
+  },
+  {
     path: '/:pathMatch(.*)*',
     redirect: (to) => {
       window.location.href = `//${window.location.hostname}:8000${to.fullPath}`

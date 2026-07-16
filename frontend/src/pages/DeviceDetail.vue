@@ -109,6 +109,38 @@
         </table>
         <div v-else class="p-4 text-center text-gray-500 text-sm">No location history recorded.</div>
       </div>
+
+      <div class="rounded-lg border bg-white overflow-hidden">
+        <div class="px-4 py-3 border-b">
+          <h3 class="text-lg font-medium">Inventory History</h3>
+        </div>
+        <div v-if="inventoryHistory.loading.value" class="p-4 text-center text-gray-500 text-sm">Loading...</div>
+        <table v-else-if="inventoryHistory.data.value?.length" class="w-full text-sm">
+          <thead class="bg-gray-50 text-gray-600 text-left">
+            <tr>
+              <th class="px-4 py-2 font-medium">Check</th>
+              <th class="px-4 py-2 font-medium">Date</th>
+              <th class="px-4 py-2 font-medium">Status</th>
+              <th class="px-4 py-2 font-medium">Checked By</th>
+              <th class="px-4 py-2 font-medium">Notes</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y">
+            <tr v-for="h in inventoryHistory.data.value" :key="h.check_name" class="hover:bg-gray-50">
+              <td class="px-4 py-2.5">
+                <router-link :to="'/inventory/' + h.check_name" class="text-blue-600 hover:underline">{{ h.check_title }}</router-link>
+              </td>
+              <td class="px-4 py-2.5 text-gray-600">{{ h.check_date }}</td>
+              <td class="px-4 py-2.5">
+                <span :class="invStatusBadge(h.check_status)" class="px-2 py-0.5 text-xs rounded-full">{{ h.check_status }}</span>
+              </td>
+              <td class="px-4 py-2.5">{{ h.checked_by || '-' }}</td>
+              <td class="px-4 py-2.5 text-gray-600 max-w-xs truncate">{{ h.notes || '' }}</td>
+            </tr>
+          </tbody>
+        </table>
+        <div v-else class="p-4 text-center text-gray-500 text-sm">No inventory history for this device.</div>
+      </div>
     </template>
 
     <div v-else class="text-gray-500">Device not found.</div>
@@ -129,9 +161,12 @@ const detail = useFetch<any>('/api/method/it_oprema2026.api.frontend.get_device_
 
 const locationLog = useFetch<any>('/api/method/it_oprema2026.api.frontend.get_device_location_log', { device: name.value })
 
+const inventoryHistory = useFetch<any[]>('/api/method/it_oprema2026.api.frontend.get_device_inventory_history', { device: name.value })
+
 watch(name, (newName) => {
   detail.fetch({ name: newName })
   locationLog.fetch({ device: newName })
+  inventoryHistory.fetch({ device: newName })
 })
 
 function goBack() {
@@ -146,5 +181,14 @@ function statusBadge(status: string): string {
     Retired: 'bg-red-100 text-red-700',
   }
   return map[status] || 'bg-blue-100 text-blue-700'
+}
+
+function invStatusBadge(status: string): string {
+  const map: Record<string, string> = {
+    OK: 'bg-green-100 text-green-700',
+    Faulty: 'bg-orange-100 text-orange-700',
+    Missing: 'bg-red-100 text-red-700',
+  }
+  return map[status] || 'bg-gray-100 text-gray-600'
 }
 </script>
