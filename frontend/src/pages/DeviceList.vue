@@ -33,6 +33,7 @@
             <th class="px-4 py-2 font-medium">Status</th>
             <th class="px-4 py-2 font-medium">Location</th>
             <th class="px-4 py-2 font-medium">Type</th>
+            <th class="px-4 py-2 font-medium"></th>
           </tr>
         </thead>
         <tbody class="divide-y">
@@ -52,6 +53,9 @@
               <span v-else-if="d.parent_device" class="px-2 py-0.5 text-xs rounded-full bg-orange-100 text-orange-700">Member</span>
               <span v-else class="px-2 py-0.5 text-xs rounded-full bg-blue-100 text-blue-700">Device</span>
             </td>
+            <td class="px-4 py-2.5">
+              <a :href="'//' + hostname + ':8000/app/device/' + d.name" target="_blank" class="text-xs text-gray-400 hover:text-gray-700" @click.stop>Desk</a>
+            </td>
           </tr>
         </tbody>
       </table>
@@ -67,6 +71,7 @@ import { useRouter } from 'vue-router'
 import { useFetch } from '@/composables/api'
 
 const router = useRouter()
+const hostname = window.location.hostname
 const search = ref('')
 const groupFilter = ref('')
 const groupOptions = ref<string[]>([])

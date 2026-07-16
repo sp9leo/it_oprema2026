@@ -1,6 +1,9 @@
 <template>
   <div>
-    <button class="px-3 py-1.5 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 mb-4" @click="goBack">&larr; Back</button>
+    <div class="flex items-center gap-2 mb-4">
+      <button class="px-3 py-1.5 text-sm border border-gray-300 rounded-lg hover:bg-gray-50" @click="goBack">&larr; Back</button>
+      <a :href="backendUrl" target="_blank" class="px-3 py-1.5 text-sm bg-gray-900 text-white rounded-lg hover:bg-gray-800">Edit in Desk</a>
+    </div>
 
     <div v-if="detail.loading.value" class="text-gray-500">Loading device...</div>
 
@@ -28,7 +31,7 @@
             </dd></div>
             <div v-if="detail.data.value.device.parent_device" class="flex justify-between py-1 border-b">
               <dt class="text-gray-600">Part of Group</dt>
-              <dd><a :href="'/app/device/' + detail.data.value.device.parent_device" class="text-blue-600 hover:underline">{{ detail.data.value.device.parent_device }}</a></dd>
+              <dd><router-link :to="'/devices/' + detail.data.value.device.parent_device" class="text-blue-600 hover:underline">{{ detail.data.value.device.parent_device }}</router-link></dd>
             </div>
           </dl>
         </div>
@@ -45,7 +48,7 @@
             </thead>
             <tbody class="divide-y">
               <tr v-for="m in detail.data.value.group_members" :key="m.device" class="hover:bg-gray-50">
-                <td class="px-4 py-2.5"><a :href="'/app/device/' + m.device" class="text-blue-600 hover:underline">{{ m.device }}</a></td>
+                <td class="px-4 py-2.5"><router-link :to="'/devices/' + m.device" class="text-blue-600 hover:underline">{{ m.device }}</router-link></td>
                 <td class="px-4 py-2.5">{{ m.role }}</td>
                 <td class="px-4 py-2.5">{{ m.attached_on ? new Date(m.attached_on).toLocaleString() : '-' }}</td>
               </tr>
@@ -114,6 +117,7 @@ import { useFetch } from '@/composables/api'
 const route = useRoute()
 const router = useRouter()
 const name = route.params.id as string
+const backendUrl = `${window.location.protocol}//${window.location.hostname}:8000/app/device/${name}`
 
 const detail = useFetch<any>('/api/method/it_oprema2026.api.frontend.get_device_detail', { name })
 

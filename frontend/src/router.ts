@@ -47,7 +47,7 @@ const routes = [
   {
     path: '/:pathMatch(.*)*',
     redirect: (to) => {
-      window.location.href = `//${window.location.hostname}:8000/it_oprema2026${to.fullPath}`
+      window.location.href = `//${window.location.hostname}:8000${to.fullPath}`
     },
   },
 ]

@@ -94,6 +94,7 @@ export default defineConfig({
       '/it_oprema2026/app': {
         target: detectProxyTarget(),
         changeOrigin: true,
+        pathRewrite: { '^/it_oprema2026': '' },
       },
     },
   },
