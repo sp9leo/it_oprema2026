@@ -93,7 +93,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { apiGet } from '@/composables/api'
 
@@ -101,6 +101,7 @@ const route = useRoute()
 const device = ref<any>(null)
 const loading = ref(true)
 const error = ref(false)
+const deviceId = computed(() => route.params.id as string)
 
 const editUrl = computed(() => `${window.location.protocol}//${window.location.hostname}:8000/app/device/${device.value?.name}`)
 
@@ -114,8 +115,9 @@ const statusBadgeClass = computed(() => {
   return map[device.value?.status] || 'bg-blue-100 text-blue-700'
 })
 
-onMounted(async () => {
-  const id = route.params.id as string
+watch(deviceId, async (id) => {
+  loading.value = true
+  error.value = false
   const data = await apiGet<any>('/api/method/it_oprema2026.api.frontend.get_device_public_info', { name: id })
   if (data) {
     device.value = data
@@ -123,5 +125,5 @@ onMounted(async () => {
     error.value = true
   }
   loading.value = false
-})
+}, { immediate: true })
 </script>
