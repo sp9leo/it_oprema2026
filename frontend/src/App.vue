@@ -54,7 +54,7 @@ async function testPing() {
   try {
     const res = await fetch('/api/method/it_oprema2026.api.frontend.ping')
     const json = await res.json()
-    pingStatus.value = json.message === 'pong'
+    pingStatus.value = json.message?.message === 'pong'
   } catch {
     pingStatus.value = false
   } finally {
