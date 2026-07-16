@@ -6,10 +6,12 @@ import { defineConfig } from 'vite'
 
 function getBenchPath() {
   let currentDir = process.cwd()
-  while (currentDir !== '/') {
+  let prevDir = null
+  while (currentDir !== prevDir) {
     if (fs.existsSync(path.join(currentDir, 'Procfile'))) {
       return path.join(currentDir)
     }
+    prevDir = currentDir
     currentDir = path.resolve(currentDir, '..')
   }
 }

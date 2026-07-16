@@ -186,15 +186,26 @@ async function checkAvailability() {
     available.value = false
     return
   }
-  const result = await apiGet<any>('/api/method/it_oprema2026.device_loan.api.check_availability', {
-    device: selected.value,
-    from_date: fromDate.value,
-    to_date: toDate.value,
-  })
-  available.value = result?.available
-  availabilityMessage.value = result?.available
-    ? 'Device is available for the selected period.'
-    : result?.error || 'Device is not available for the selected period.'
+  try {
+    const res = await fetch('/api/method/it_oprema2026.device_loan.api.check_availability?device=' + encodeURIComponent(selected.value) + '&from_date=' + encodeURIComponent(fromDate.value) + '&to_date=' + encodeURIComponent(toDate.value))
+    const json = await res.json()
+    if (json.message) {
+      available.value = json.message.available
+      availabilityMessage.value = json.message.available
+        ? 'Device is available for the selected period.'
+        : json.message.error || 'Device is not available for the selected period (conflicting loan exists).'
+    } else if (json.exception) {
+      const msgs = json._server_messages ? JSON.parse(json._server_messages) : []
+      available.value = false
+      availabilityMessage.value = 'API error: ' + (msgs[0] || 'Unknown error')
+    } else {
+      available.value = false
+      availabilityMessage.value = 'Unexpected response from server.'
+    }
+  } catch (e: any) {
+    available.value = false
+    availabilityMessage.value = 'Network error: ' + e.message
+  }
 }
 
 async function createBooking() {

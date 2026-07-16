@@ -1,9 +1,11 @@
+from __future__ import annotations
+
 import frappe
-from frappe.utils import now_datetime
+from frappe.utils import getdate
 
 
 @frappe.whitelist(allow_guest=True)
-def get_bookable_devices():
+def get_bookable_devices() -> list[dict]:
     devices = frappe.get_all(
         "Device",
         filters={"is_bookable": 1},
@@ -19,41 +21,48 @@ def get_bookable_devices():
 
 
 @frappe.whitelist(allow_guest=True)
-def check_availability(device, from_date, to_date):
-    from frappe.utils import getdate
-    from_date = getdate(from_date)
-    to_date = getdate(to_date)
+def check_availability(device: str, from_date: str, to_date: str) -> dict:
+    if not from_date or not to_date:
+        return {"available": False, "error": "Manjkajo\u010di datumi"}
 
-    if from_date > to_date:
+    d_from = getdate(from_date)
+    d_to = getdate(to_date)
+
+    if not d_from or not d_to:
+        return {"available": False, "error": "Neveljaven format datuma"}
+
+    if d_from > d_to:
         return {"available": False, "error": "Za\u010detni datum je kasnej\u0161i od kon\u010dnega"}
 
     overlaps = frappe.db.sql("""
         SELECT COUNT(*) as cnt FROM `tabDevice Loan`
         WHERE device = %(device)s
           AND status NOT IN ('Cancelled', 'Returned')
-          AND %(to_date)s >= from_date
-          AND %(from_date)s <= to_date
-    """, {"device": device, "from_date": from_date, "to_date": to_date}, as_dict=True)
+          AND %(d_to)s >= from_date
+          AND %(d_from)s <= to_date
+    """, {"device": device, "d_from": d_from, "d_to": d_to}, as_dict=True)
 
     return {"available": overlaps[0].cnt == 0}
 
 
 @frappe.whitelist(allow_guest=True)
-def create_loan(device, customer_name, customer_email, from_date, to_date, purpose=None):
-    from frappe.utils import getdate
-    from_date = getdate(from_date)
-    to_date = getdate(to_date)
+def create_loan(device: str, customer_name: str, customer_email: str, from_date: str, to_date: str, purpose: str | None = None) -> dict:
+    d_from = getdate(from_date)
+    d_to = getdate(to_date)
 
-    if from_date > to_date:
+    if not d_from or not d_to:
+        frappe.throw("Neveljaven format datuma")
+
+    if d_from > d_to:
         frappe.throw("Za\u010detni datum je kasnej\u0161i od kon\u010dnega")
 
     avail = frappe.db.sql("""
         SELECT COUNT(*) as cnt FROM `tabDevice Loan`
         WHERE device = %(device)s
           AND status NOT IN ('Cancelled', 'Returned')
-          AND %(to_date)s >= from_date
-          AND %(from_date)s <= to_date
-    """, {"device": device, "from_date": from_date, "to_date": to_date}, as_dict=True)
+          AND %(d_to)s >= from_date
+          AND %(d_from)s <= to_date
+    """, {"device": device, "d_from": d_from, "d_to": d_to}, as_dict=True)
 
     if avail[0].cnt > 0:
         frappe.throw("Naprava v izbranem obdobju ni na voljo")
@@ -78,7 +87,7 @@ def create_loan(device, customer_name, customer_email, from_date, to_date, purpo
 
 
 @frappe.whitelist(allow_guest=True)
-def lookup_loan(email, booking_ref):
+def lookup_loan(email: str, booking_ref: str) -> dict | None:
     loan = frappe.db.get_value(
         "Device Loan",
         {"customer_email": email, "booking_ref": booking_ref},
@@ -92,7 +101,7 @@ def lookup_loan(email, booking_ref):
 
 
 @frappe.whitelist(allow_guest=True)
-def get_loan_by_token(access_token):
+def get_loan_by_token(access_token: str) -> dict | None:
     loan = frappe.db.get_value(
         "Device Loan",
         {"access_token": access_token},
@@ -107,7 +116,7 @@ def get_loan_by_token(access_token):
 
 
 @frappe.whitelist(allow_guest=True)
-def cancel_loan(access_token):
+def cancel_loan(access_token: str) -> dict:
     loan = frappe.get_doc("Device Loan", {"access_token": access_token})
     if loan.status == "Cancelled":
         return {"ok": False, "message": "\u017de preklicano"}
@@ -119,7 +128,7 @@ def cancel_loan(access_token):
 
 
 @frappe.whitelist(allow_guest=True)
-def get_booked_dates(device):
+def get_booked_dates(device: str) -> list[str]:
     loans = frappe.db.sql("""
         SELECT from_date, to_date FROM `tabDevice Loan`
         WHERE device = %(device)s
@@ -129,15 +138,14 @@ def get_booked_dates(device):
 
     dates = set()
     for l in loans:
-        from frappe.utils import date_diff, add_days, getdate
-        delta = date_diff(l.to_date, l.from_date)
+        delta = frappe.utils.date_diff(l.to_date, l.from_date)
         for i in range(delta + 1):
-            dates.add(str(add_days(l.from_date, i)))
+            dates.add(str(frappe.utils.add_days(l.from_date, i)))
     return sorted(list(dates))
 
 
 @frappe.whitelist(allow_guest=True)
-def get_loans_by_email(email):
+def get_loans_by_email(email: str) -> list[dict]:
     loans = frappe.get_all(
         "Device Loan",
         filters={"customer_email": email},
@@ -150,17 +158,15 @@ def get_loans_by_email(email):
     return loans
 
 
-# Scheduled tasks
 @frappe.whitelist()
-def expire_stale_tokens():
+def expire_stale_tokens() -> None:
     frappe.db.sql("""
         UPDATE `tabDevice Loan` SET status = 'Returned'
         WHERE status = 'Confirmed' AND to_date < CURDATE()
     """)
 
 
-# Internal notification helpers (called via frappe.enqueue)
-def notify_loan_confirmed(docname, method=None):
+def notify_loan_confirmed(docname: str, method: str | None = None) -> None:
     loan = frappe.get_doc("Device Loan", docname)
     device_name = frappe.db.get_value("Device", loan.device, "device_name")
     frappe.sendmail(
@@ -172,7 +178,7 @@ def notify_loan_confirmed(docname, method=None):
     )
 
 
-def notify_loan_cancelled(docname, method=None):
+def notify_loan_cancelled(docname: str, method: str | None = None) -> None:
     loan = frappe.get_doc("Device Loan", docname)
     frappe.sendmail(
         recipients=[loan.customer_email],

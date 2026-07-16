@@ -36,7 +36,8 @@ class DeviceLoan(Document):
         self.access_token = secrets.token_urlsafe(32)
 
     def on_update(self):
-        if self.has_value_changed("status") and self.status == "Confirmed":
+        before = self.get_doc_before_save()
+        if before and before.status != "Confirmed" and self.status == "Confirmed":
             frappe.enqueue("it_oprema2026.device_loan.api.notify_loan_confirmed", docname=self.name)
 
     def after_insert(self):
