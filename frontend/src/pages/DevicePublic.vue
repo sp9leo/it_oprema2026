@@ -20,6 +20,7 @@
           </div>
           <span :class="statusBadgeClass" class="px-3 py-1 text-sm font-medium rounded-full shrink-0 ml-3">{{ device.status }}</span>
         </div>
+        <a :href="editUrl" target="_blank" class="mt-3 inline-flex items-center gap-1 px-3 py-1.5 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 text-gray-700">Edit</a>
       </div>
 
       <div class="px-4 py-4 space-y-3">
@@ -84,6 +85,8 @@ const route = useRoute()
 const device = ref<any>(null)
 const loading = ref(true)
 const error = ref(false)
+
+const editUrl = computed(() => `${window.location.protocol}//${window.location.hostname}:8000/app/device/${device.value?.name}`)
 
 const statusBadgeClass = computed(() => {
   const map: Record<string, string> = {
