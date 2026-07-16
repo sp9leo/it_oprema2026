@@ -6,6 +6,25 @@ def ping() -> dict:
     return {"message": "pong"}
 
 
+@frappe.whitelist(allow_guest=True)
+def get_device_public_info(name: str) -> dict:
+    device = frappe.get_doc("Device", name)
+    return {
+        "name": device.name,
+        "device_inventory_code": device.device_inventory_code,
+        "device_id": device.device_id,
+        "device_name": device.device_name,
+        "device_serial": device.device_serial,
+        "device_group": device.device_group,
+        "device_manufacturer": device.device_manufacturer,
+        "device_manufacturer_model": device.device_manufacturer_model,
+        "status": device.status,
+        "location": device.location,
+        "is_computer": device.is_computer,
+        "parent_device": device.parent_device,
+    }
+
+
 @frappe.whitelist()
 def get_dashboard_stats() -> dict:
     return {

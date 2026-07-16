@@ -1,7 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { sessionUser } from '@/data/session'
 
-const publicRoutes = ['Login', 'LoanDetail']
+const publicRoutes = ['Login', 'LoanDetail', 'DevicePublic']
 
 const routes = [
   {
@@ -43,6 +43,11 @@ const routes = [
     path: '/loans/manage/:token',
     name: 'LoanDetail',
     component: () => import('@/pages/LoanDetail.vue'),
+  },
+  {
+    path: '/d/:id',
+    name: 'DevicePublic',
+    component: () => import('@/pages/DevicePublic.vue'),
   },
   {
     path: '/inventory',

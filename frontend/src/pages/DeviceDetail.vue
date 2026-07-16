@@ -3,6 +3,21 @@
     <div class="flex items-center gap-2 mb-4">
       <button class="px-3 py-1.5 text-sm border border-gray-300 rounded-lg hover:bg-gray-50" @click="goBack">&larr; Back</button>
       <a :href="backendUrl" target="_blank" class="px-3 py-1.5 text-sm bg-gray-900 text-white rounded-lg hover:bg-gray-800">Edit in Desk</a>
+      <button class="px-3 py-1.5 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 ml-auto" @click="showQR = true">QR Code</button>
+    </div>
+
+    <div v-if="showQR" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" @click.self="showQR = false">
+      <div class="bg-white rounded-xl p-6 max-w-sm w-full shadow-xl">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="text-lg font-medium">Device QR Code</h3>
+          <button class="text-gray-400 hover:text-gray-600 text-xl leading-none" @click="showQR = false">&times;</button>
+        </div>
+        <div class="flex justify-center mb-4">
+          <img :src="qrUrl" alt="QR Code" class="w-48 h-48" />
+        </div>
+        <p class="text-sm text-gray-500 text-center mb-4 break-all">{{ publicUrl }}</p>
+        <button class="w-full px-3 py-2 text-sm bg-gray-900 text-white rounded-lg hover:bg-gray-800" @click="copyLink">Copy Link</button>
+      </div>
     </div>
 
     <div v-if="detail.loading.value" class="text-gray-500">Loading device...</div>
@@ -148,7 +163,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useFetch } from '@/composables/api'
 
@@ -156,6 +171,9 @@ const route = useRoute()
 const router = useRouter()
 const name = computed(() => route.params.id as string)
 const backendUrl = computed(() => `${window.location.protocol}//${window.location.hostname}:8000/app/device/${name.value}`)
+const showQR = ref(false)
+const publicUrl = computed(() => `${window.location.protocol}//${window.location.hostname}${router.resolve({ name: 'DevicePublic', params: { id: name.value } }).href}`)
+const qrUrl = computed(() => `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(publicUrl.value)}`)
 
 const detail = useFetch<any>('/api/method/it_oprema2026.api.frontend.get_device_detail', { name: name.value })
 
@@ -190,5 +208,18 @@ function invStatusBadge(status: string): string {
     Missing: 'bg-red-100 text-red-700',
   }
   return map[status] || 'bg-gray-100 text-gray-600'
+}
+
+async function copyLink() {
+  try {
+    await navigator.clipboard.writeText(publicUrl.value)
+  } catch {
+    const el = document.createElement('textarea')
+    el.value = publicUrl.value
+    document.body.appendChild(el)
+    el.select()
+    document.execCommand('copy')
+    document.body.removeChild(el)
+  }
 }
 </script>
