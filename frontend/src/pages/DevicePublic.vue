@@ -63,7 +63,7 @@
             <div class="text-xs font-medium text-gray-400 uppercase tracking-wider mb-2">Members ({{ device.group_members.length }})</div>
             <div class="space-y-2">
               <div v-for="m in device.group_members" :key="m.device" class="flex items-center justify-between text-sm">
-                <span class="text-gray-900">{{ m.device }}</span>
+                <router-link :to="'/d/' + m.device" class="text-blue-600 hover:underline">{{ m.device }}</router-link>
                 <span class="text-xs text-gray-500">{{ m.role || '-' }}</span>
               </div>
             </div>
@@ -76,7 +76,7 @@
           <div class="flex items-center gap-2 mb-2">
             <span class="px-2.5 py-1 text-sm rounded-full bg-orange-100 text-orange-700">Member</span>
           </div>
-          <div class="text-sm text-gray-900">{{ device.parent_device }}</div>
+          <router-link :to="'/d/' + device.parent_device" class="text-sm text-blue-600 hover:underline">{{ device.parent_device }}</router-link>
         </div>
 
         <div v-else class="bg-white rounded-xl px-4 py-3 shadow-sm border">
