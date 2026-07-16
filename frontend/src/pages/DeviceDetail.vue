@@ -116,17 +116,23 @@
 </template>
 
 <script setup lang="ts">
+import { computed, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useFetch } from '@/composables/api'
 
 const route = useRoute()
 const router = useRouter()
-const name = route.params.id as string
-const backendUrl = `${window.location.protocol}//${window.location.hostname}:8000/app/device/${name}`
+const name = computed(() => route.params.id as string)
+const backendUrl = computed(() => `${window.location.protocol}//${window.location.hostname}:8000/app/device/${name.value}`)
 
-const detail = useFetch<any>('/api/method/it_oprema2026.api.frontend.get_device_detail', { name })
+const detail = useFetch<any>('/api/method/it_oprema2026.api.frontend.get_device_detail', { name: name.value })
 
-const locationLog = useFetch<any>('/api/method/it_oprema2026.api.frontend.get_device_location_log', { device: name })
+const locationLog = useFetch<any>('/api/method/it_oprema2026.api.frontend.get_device_location_log', { device: name.value })
+
+watch(name, (newName) => {
+  detail.fetch({ name: newName })
+  locationLog.fetch({ device: newName })
+})
 
 function goBack() {
   router.push({ name: 'Devices' })
