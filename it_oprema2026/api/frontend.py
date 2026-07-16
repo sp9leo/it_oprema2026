@@ -17,12 +17,16 @@ def get_dashboard_stats() -> dict:
 
 @frappe.whitelist()
 def get_devices(
-    filters: str | None = None, limit: int = 50, offset: int = 0
+    filters: str | None = None, search: str = "", limit: int = 50, offset: int = 0
 ) -> dict:
     filters_dict = frappe.parse_json(filters) if filters else {}
     conditions = ""
     for key, val in filters_dict.items():
         conditions += f" AND {key} = {frappe.db.escape(val)}"
+
+    if search:
+        like = frappe.db.escape(f"%{search}%")
+        conditions += f" AND (device_name LIKE {like} OR device_inventory_code LIKE {like} OR device_id LIKE {like})"
 
     devices = frappe.db.sql(
         f"""

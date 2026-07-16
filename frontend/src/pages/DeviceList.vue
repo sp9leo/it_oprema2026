@@ -76,12 +76,17 @@ const search = ref('')
 const groupFilter = ref('')
 const groupOptions = ref<string[]>([])
 
-const devices = useFetch<any>('/api/method/it_oprema2026.api.frontend.get_devices')
+const devices = useFetch<any>('/api/method/it_oprema2026.api.frontend.get_devices', undefined, {
+  onSuccess(data) {
+    const groups = [...new Set<string>(data?.data?.map((d: any) => d.device_group).filter(Boolean))]
+    groupOptions.value = groups.sort()
+  },
+})
 
 function loadDevices() {
   const filters: Record<string, string> = {}
   if (groupFilter.value) filters.device_group = groupFilter.value
-  devices.fetch({ filters: JSON.stringify(filters) })
+  devices.fetch({ filters: JSON.stringify(filters), search: search.value })
 }
 
 let debounceTimer: ReturnType<typeof setTimeout>

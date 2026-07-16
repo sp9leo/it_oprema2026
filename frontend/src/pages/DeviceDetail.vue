@@ -19,6 +19,7 @@
           <span v-else-if="detail.data.value.device.parent_device" class="px-2 py-1 text-xs rounded-full bg-orange-100 text-orange-700">Member</span>
           <span v-else class="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-700">Device</span>
         </div>
+      </div>
 
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
         <div class="rounded-lg border bg-white p-4">
