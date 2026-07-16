@@ -52,12 +52,12 @@
               <td class="px-3 py-2">{{ item.device_group }}</td>
               <td class="px-3 py-2 text-gray-600">{{ item.location || '-' }}</td>
               <td class="px-3 py-2">
-                <select v-model="item.check_status" class="border border-gray-300 rounded px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500" @change="updateItem(item)">
+                <select v-model="item.check_status" class="border border-gray-300 rounded px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed" :disabled="isCompleted" @change="updateItem(item)">
                   <option v-for="s in statusOptions" :key="s" :value="s">{{ s }}</option>
                 </select>
               </td>
               <td class="px-3 py-2">
-                <input v-model="item.notes" class="w-full border border-gray-300 rounded px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Notes..." @change="updateItem(item)" />
+                <input v-model="item.notes" class="w-full border border-gray-300 rounded px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed" placeholder="Notes..." :disabled="isCompleted" @change="updateItem(item)" />
               </td>
             </tr>
           </tbody>
@@ -78,10 +78,10 @@
             <div><span class="text-gray-400">Location:</span> {{ item.location || '-' }}</div>
           </div>
           <div class="flex flex-col gap-2">
-            <select v-model="item.check_status" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" @change="updateItem(item)">
+            <select v-model="item.check_status" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed" :disabled="isCompleted" @change="updateItem(item)">
               <option v-for="s in statusOptions" :key="s" :value="s">{{ s }}</option>
             </select>
-            <input v-model="item.notes" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Notes..." @change="updateItem(item)" />
+            <input v-model="item.notes" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed" placeholder="Notes..." :disabled="isCompleted" @change="updateItem(item)" />
           </div>
         </div>
       </div>
@@ -114,6 +114,8 @@ const filterOptions = [
   { value: 'faulty', label: 'Faulty' },
   { value: 'missing', label: 'Missing' },
 ]
+
+const isCompleted = computed(() => check.data.value?.status === 'Completed')
 
 const items = computed(() => check.data.value?.items || [])
 
