@@ -107,6 +107,18 @@ def get_locations() -> list:
 
 
 @frappe.whitelist()
+def get_device_groups() -> list:
+    return frappe.db.sql(
+        """
+        SELECT name, device_group_name, is_computer
+        FROM `tabDevice Group`
+        ORDER BY name ASC
+        """,
+        as_dict=True,
+    )
+
+
+@frappe.whitelist()
 def get_doctype_list() -> list:
     tables = frappe.db.sql_list(
         "SELECT name FROM information_schema.tables WHERE table_name LIKE 'tab%' AND table_schema = DATABASE()"

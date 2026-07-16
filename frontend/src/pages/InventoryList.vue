@@ -18,11 +18,17 @@
         </div>
         <div>
           <label class="block text-sm text-gray-600 mb-1">Device Group (optional)</label>
-          <input v-model="form.device_group" class="w-full border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Filter by group" />
+          <select v-model="form.device_group" class="w-full border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+            <option value="">All Groups</option>
+            <option v-for="g in groups.data.value || []" :key="g.name" :value="g.name">{{ g.device_group_name || g.name }}</option>
+          </select>
         </div>
         <div>
           <label class="block text-sm text-gray-600 mb-1">Location (optional)</label>
-          <input v-model="form.location" class="w-full border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Filter by location" />
+          <select v-model="form.location" class="w-full border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+            <option value="">All Locations</option>
+            <option v-for="l in locations.data.value || []" :key="l.name" :value="l.name">{{ l.location_name || l.name }}</option>
+          </select>
         </div>
       </div>
       <div class="flex gap-2">
@@ -71,6 +77,8 @@ const creating = ref(false)
 const form = reactive({ title: '', date: new Date().toISOString().slice(0, 10), device_group: '', location: '' })
 
 const checks = useFetch<any[]>('/api/method/it_oprema2026.api.frontend.get_inventory_checks')
+const groups = useFetch<any[]>('/api/method/it_oprema2026.api.frontend.get_device_groups')
+const locations = useFetch<any[]>('/api/method/it_oprema2026.api.frontend.get_locations')
 
 async function createCheck() {
   creating.value = true
