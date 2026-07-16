@@ -36,6 +36,12 @@ const routes = [
     name: 'LoanDetail',
     component: () => import('@/pages/LoanDetail.vue'),
   },
+  {
+    path: '/:pathMatch(.*)*',
+    redirect: (to) => {
+      window.location.href = `//${window.location.hostname}:8000/it_oprema2026${to.fullPath}`
+    },
+  },
 ]
 
 let router = createRouter({

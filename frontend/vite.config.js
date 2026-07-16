@@ -91,6 +91,10 @@ export default defineConfig({
         target: detectProxyTarget(),
         changeOrigin: true,
       },
+      '/it_oprema2026/app': {
+        target: detectProxyTarget(),
+        changeOrigin: true,
+      },
     },
   },
   resolve: {
