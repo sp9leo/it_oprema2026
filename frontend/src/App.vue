@@ -60,7 +60,7 @@ import { session } from '@/data/session'
 
 const route = useRoute()
 
-const isLoginPage = computed(() => route.name === 'Login')
+const isLoginPage = computed(() => route.name === 'Login' || route.name === 'DevicePublic')
 
 const showPing = ref(false)
 const pingStatus = ref(false)

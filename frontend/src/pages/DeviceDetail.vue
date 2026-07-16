@@ -172,7 +172,7 @@ const router = useRouter()
 const name = computed(() => route.params.id as string)
 const backendUrl = computed(() => `${window.location.protocol}//${window.location.hostname}:8000/app/device/${name.value}`)
 const showQR = ref(false)
-const publicUrl = computed(() => `${window.location.protocol}//${window.location.hostname}${router.resolve({ name: 'DevicePublic', params: { id: name.value } }).href}`)
+const publicUrl = computed(() => `${window.location.protocol}//${window.location.host}${router.resolve({ name: 'DevicePublic', params: { id: name.value } }).href}`)
 const qrUrl = computed(() => `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(publicUrl.value)}`)
 
 const detail = useFetch<any>('/api/method/it_oprema2026.api.frontend.get_device_detail', { name: name.value })
