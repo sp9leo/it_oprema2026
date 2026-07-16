@@ -310,16 +310,24 @@
   }
  ],
  "index_web_pages_for_search": 1,
-  "links": [
-   {
-    "link_doctype": "Device IP Link",
-    "link_fieldname": "device_link"
-   },
-   {
-    "link_doctype": "Device Loan",
-    "link_fieldname": "device"
-   }
-  ],
+   "links": [
+    {
+     "link_doctype": "Device IP Link",
+     "link_fieldname": "device_link"
+    },
+    {
+     "link_doctype": "Device Loan",
+     "link_fieldname": "device"
+    },
+    {
+     "link_doctype": "Device Location Log",
+     "link_fieldname": "device"
+    },
+    {
+     "link_doctype": "IP Address",
+     "link_fieldname": "device_link"
+    }
+   ],
  "modified": "2025-12-16 09:28:06.317704",
  "modified_by": "Administrator",
  "module": "IT_Oprema",
