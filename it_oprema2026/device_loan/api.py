@@ -144,7 +144,7 @@ def get_booked_dates(device: str) -> list[str]:
     return sorted(list(dates))
 
 
-@frappe.whitelist(allow_guest=True)
+@frappe.whitelist()
 def get_loans_by_email(email: str) -> list[dict]:
     loans = frappe.get_all(
         "Device Loan",
