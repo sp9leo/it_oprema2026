@@ -1,6 +1,14 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import { sessionUser } from '@/data/session'
+
+const publicRoutes = ['Login', 'LoanDetail']
 
 const routes = [
+  {
+    path: '/login',
+    name: 'Login',
+    component: () => import('@/pages/Login.vue'),
+  },
   {
     path: '/',
     name: 'Home',
@@ -47,6 +55,15 @@ const routes = [
 let router = createRouter({
   history: createWebHistory('/it_oprema2026'),
   routes,
+})
+
+router.beforeEach((to, _from, next) => {
+  const isLoggedIn = sessionUser.value != null
+  if (!isLoggedIn && !publicRoutes.includes(to.name as string)) {
+    next({ name: 'Login', query: { redirect: to.fullPath } })
+  } else {
+    next()
+  }
 })
 
 export default router
