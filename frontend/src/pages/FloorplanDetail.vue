@@ -113,8 +113,10 @@ function initMap() {
     attributionControl: false,
   })
 
+  const bgPane = map.createPane('floorplan-bg')
+  bgPane.style.zIndex = '1'
   const imageBounds: L.LatLngBoundsExpression = [[0, 0], [imgH, imgW]]
-  L.imageOverlay(plan.value.image, imageBounds).addTo(map)
+  L.imageOverlay(plan.value.image, imageBounds, { pane: 'floorplan-bg' }).addTo(map)
   map.fitBounds(imageBounds)
 
   map.on('click', (e: L.LeafletMouseEvent) => {
