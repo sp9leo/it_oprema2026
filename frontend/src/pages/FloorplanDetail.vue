@@ -151,10 +151,9 @@ function initMap() {
     attributionControl: false,
   })
 
-  const bgPane = map.createPane('floorplan-bg')
-  bgPane.style.zIndex = '1'
   const imageBounds: L.LatLngBoundsExpression = [[0, 0], [imgH, imgW]]
-  L.imageOverlay(plan.value.image, imageBounds, { pane: 'floorplan-bg' }).addTo(map)
+  const imgOverlay = L.imageOverlay(plan.value.image, imageBounds).addTo(map)
+  imgOverlay.getElement()?.style.setProperty('pointer-events', 'none')
   map.fitBounds(imageBounds)
 
   const roomsLayer = L.layerGroup().addTo(map)
