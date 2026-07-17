@@ -42,9 +42,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, computed } from 'vue'
-// @ts-ignore
-import L from 'leaflet/dist/leaflet'
+import { ref, onMounted, onUnmounted } from 'vue'
+import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import { useFetch } from '@/composables/api'
 
