@@ -91,7 +91,7 @@ function initMap() {
 
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '&copy; OpenStreetMap contributors',
-    maxZoom: 20,
+    maxZoom: 19,
   }).addTo(map)
 
   const bounds: L.LatLngBoundsLiteral = []
