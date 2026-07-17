@@ -152,8 +152,7 @@ function initMap() {
   })
 
   const imageBounds: L.LatLngBoundsExpression = [[0, 0], [imgH, imgW]]
-  const imgOverlay = L.imageOverlay(plan.value.image, imageBounds).addTo(map)
-  imgOverlay.getElement()?.style.setProperty('pointer-events', 'none')
+  L.imageOverlay(plan.value.image, imageBounds, { pane: 'tilePane' }).addTo(map)
   map.fitBounds(imageBounds)
 
   const roomsLayer = L.layerGroup().addTo(map)
