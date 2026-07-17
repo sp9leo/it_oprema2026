@@ -97,6 +97,14 @@ export default defineConfig({
         changeOrigin: true,
         pathRewrite: { '^/it_oprema2026': '' },
       },
+      '/files': {
+        target: detectProxyTarget(),
+        changeOrigin: true,
+      },
+      '/private': {
+        target: detectProxyTarget(),
+        changeOrigin: true,
+      },
     },
   },
   resolve: {

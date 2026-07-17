@@ -1,13 +1,18 @@
 <template>
-  <aside class="w-60 bg-gray-900 text-white flex flex-col shrink-0">
-    <div class="p-4 border-b border-gray-700">
-      <div class="flex items-center gap-2">
-        <svg viewBox="0 0 24 24" class="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" stroke-width="2">
+  <aside class="bg-gray-900 text-white flex flex-col shrink-0 transition-all duration-200" :class="collapsed ? 'w-14' : 'w-60'">
+    <div class="p-4 border-b border-gray-700 flex items-center" :class="collapsed ? 'justify-center' : 'gap-2'">
+      <button class="text-gray-300 hover:text-white shrink-0" @click="toggle">
+        <svg viewBox="0 0 24 24" class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+        </svg>
+      </button>
+      <div v-if="!collapsed" class="flex items-center gap-2 min-w-0">
+        <svg viewBox="0 0 24 24" class="w-6 h-6 text-blue-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2">
           <rect x="2" y="3" width="20" height="14" rx="2" />
           <line x1="8" y1="21" x2="16" y2="21" />
           <line x1="12" y1="17" x2="12" y2="21" />
         </svg>
-        <div>
+        <div class="truncate">
           <div class="font-semibold text-sm">IT Oprema 2026</div>
           <div class="text-xs text-gray-400">Upravljanje napravami</div>
         </div>
@@ -15,16 +20,17 @@
     </div>
     <nav class="flex-1 p-2 space-y-1 overflow-y-auto">
       <div v-for="section in sections" :key="section.label">
-        <div class="text-xs font-medium text-gray-400 uppercase tracking-wider px-3 py-2">{{ section.label }}</div>
+        <div v-if="!collapsed" class="text-xs font-medium text-gray-400 uppercase tracking-wider px-3 py-2">{{ section.label }}</div>
         <router-link
           v-for="item in section.items"
           :key="item.label"
           :to="item.to"
           class="flex items-center gap-2 px-3 py-2 rounded-md text-sm transition-colors"
           :class="isActive(item.to) ? 'bg-gray-700 text-white' : 'text-gray-300 hover:bg-gray-800 hover:text-white'"
+          :title="collapsed ? item.label : ''"
         >
           <component :is="item.icon" class="w-4 h-4 shrink-0" />
-          {{ item.label }}
+          <span v-if="!collapsed">{{ item.label }}</span>
         </router-link>
       </div>
     </nav>
@@ -32,10 +38,17 @@
 </template>
 
 <script setup lang="ts">
+import { ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { h } from 'vue'
 
 const route = useRoute()
+const collapsed = ref(localStorage.getItem('sidebar_collapsed') === 'true')
+
+function toggle() {
+  collapsed.value = !collapsed.value
+  localStorage.setItem('sidebar_collapsed', String(collapsed.value))
+}
 
 function isActive(to: string): boolean {
   if (to === '/') return route.path === '/'
