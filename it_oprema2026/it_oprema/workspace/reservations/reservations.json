@@ -1,7 +1,7 @@
 {
  "app": "it_oprema2026",
  "charts": [],
- "content": "[{\"id\":\"nPeYxlB4aS\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">Izposoje</span>\",\"col\":12}},{\"id\":\"gK7jM2pR1q\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Device Loan\",\"col\":3}},{\"id\":\"hL8kN3qS2r\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Device\",\"col\":3}},{\"id\":\"jN0mP5sU4t\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Location\",\"col\":3}},{\"id\":\"kO1nQ6tV5u\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Network\",\"col\":3}}]",
+ "content": "[{\"id\":\"nPeYxlB4aS\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">Izposoje</span>\",\"col\":12}},{\"id\":\"gK7jM2pR1q\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Device Loan\",\"col\":3}},{\"id\":\"hL8kN3qS2r\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Device\",\"col\":3}},{\"id\":\"jN0mP5sU4t\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Location\",\"col\":3}},{\"id\":\"kO1nQ6tV5u\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Network\",\"col\":3}},{\"id\":\"lP2oR7uW6v\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Inventory Check\",\"col\":3}}]",
  "creation": "2026-01-10 12:13:37.465697",
  "custom_blocks": [],
  "docstatus": 0,
@@ -136,20 +136,27 @@
      "link_to": "Network",
      "icon": "globe"
     },
-    {
-     "type": "Link",
-     "label": "Device Location Log",
-     "link_type": "DocType",
-     "link_to": "Device Location Log",
-     "icon": "map-pin"
-    },
-    {
-     "type": "Link",
-     "label": "Device Loan",
-     "link_type": "DocType",
-     "link_to": "Device Loan",
-     "icon": "hand"
-    }
+     {
+      "type": "Link",
+      "label": "Device Location Log",
+      "link_type": "DocType",
+      "link_to": "Device Location Log",
+      "icon": "map-pin"
+     },
+     {
+      "type": "Link",
+      "label": "Inventory Check",
+      "link_type": "DocType",
+      "link_to": "Inventory Check",
+      "icon": "check"
+     },
+     {
+      "type": "Link",
+      "label": "Device Loan",
+      "link_type": "DocType",
+      "link_to": "Device Loan",
+      "icon": "hand"
+     }
    ],
    "sequence_id": 28.0,
  "shortcuts": [
@@ -183,6 +190,14 @@
     "doc_view": "List",
     "label": "Network",
     "link_to": "Network",
+    "stats_filter": "[]",
+    "type": "DocType"
+   },
+   {
+    "color": "Green",
+    "doc_view": "List",
+    "label": "Inventory Check",
+    "link_to": "Inventory Check",
     "stats_filter": "[]",
     "type": "DocType"
    }
