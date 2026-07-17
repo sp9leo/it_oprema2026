@@ -501,28 +501,26 @@ def get_map_data() -> dict:
             as_dict=True,
         )
 
-        coords = None
+        geometry = None
         geo = loc.get("location")
         if geo:
             try:
                 parsed = frappe.parse_json(geo) if isinstance(geo, str) else geo
                 features = parsed.get("features", [])
                 if features:
-                    geom = features[0].get("geometry", {})
-                    if geom.get("type") == "Point":
-                        coords = geom["coordinates"]  # [lng, lat]
+                    geometry = features[0].get("geometry")
             except Exception:
                 pass
 
-        if not coords and loc.latitude and loc.longitude:
-            coords = [float(loc.longitude), float(loc.latitude)]
+        if not geometry and loc.latitude and loc.longitude:
+            geometry = {"type": "Point", "coordinates": [float(loc.longitude), float(loc.latitude)]}
 
-        if coords:
+        if geometry:
             result.append({
                 "name": loc.name,
                 "location_name": loc.location_name,
                 "parent_location": loc.parent_location,
-                "coordinates": coords,
+                "geometry": geometry,
                 "device_count": len(devices),
                 "devices": devices,
             })
