@@ -411,6 +411,19 @@ def delete_device(name: str) -> dict:
     return {"ok": True}
 
 
+@frappe.whitelist()
+def update_device_floorplan(name: str, room: str | None = None, map_x: int | None = None, map_y: int | None = None) -> dict:
+    doc = frappe.get_doc("Device", name)
+    if room is not None:
+        doc.room = room or None
+    if map_x is not None:
+        doc.map_x = map_x
+    if map_y is not None:
+        doc.map_y = map_y
+    doc.save(ignore_permissions=True)
+    return {"ok": True}
+
+
 # --- Maintenance ---
 
 @frappe.whitelist()
@@ -479,7 +492,7 @@ def get_device_audit_log(device: str) -> list:
 
 @frappe.whitelist()
 def get_floorplans() -> list:
-    return frappe.db.sql(
+    plans = frappe.db.sql(
         """
         SELECT name, title, image, image_width, image_height
         FROM `tabFloorplan`
@@ -487,37 +500,51 @@ def get_floorplans() -> list:
         """,
         as_dict=True,
     )
+    room_counts = frappe.db.sql(
+        """
+        SELECT floorplan, COUNT(*) AS count
+        FROM `tabRoom`
+        GROUP BY floorplan
+        """,
+        as_dict=True,
+    )
+    count_map = {r.floorplan: r.count for r in room_counts}
+    for p in plans:
+        p["room_count"] = count_map.get(p.name, 0)
+    return plans
+
+
+@frappe.whitelist()
+def get_floorplan_rooms(floorplan: str) -> list:
+    return frappe.get_all("Room", {"floorplan": floorplan}, ["name", "room_name", "bounds_top", "bounds_left", "bounds_bottom", "bounds_right", "color"], order_by="name")
 
 
 @frappe.whitelist()
 def get_floorplan_detail(name: str) -> dict:
     doc = frappe.get_doc("Floorplan", name)
 
-    rooms = []
-    for r in doc.rooms:
+    rooms_data = []
+    rooms = frappe.get_all("Room", {"floorplan": doc.name}, order_by="name")
+
+    for r in rooms:
+        room = frappe.get_doc("Room", r.name)
         devices = frappe.db.sql(
             """
             SELECT name AS device_id, device_name, device_inventory_code, device_group, status,
                    map_x, map_y
             FROM `tabDevice`
-            WHERE floorplan = %s
+            WHERE room = %s
+            ORDER BY name ASC
             """,
-            doc.name,
+            room.name,
             as_dict=True,
         )
 
-        room_devices = [
-            d for d in devices
-            if d.map_x is not None and d.map_y is not None
-            and r.bounds_left <= d.map_x <= r.bounds_right
-            and r.bounds_top <= d.map_y <= r.bounds_bottom
-        ]
-
-        rooms.append({
-            "room_name": r.room_name,
-            "bounds": [[r.bounds_top, r.bounds_left], [r.bounds_bottom, r.bounds_right]],
-            "color": r.color or "#3b82f6",
-            "devices": room_devices,
+        rooms_data.append({
+            "room_name": room.room_name,
+            "bounds": [[room.bounds_top, room.bounds_left], [room.bounds_bottom, room.bounds_right]],
+            "color": room.color or "#3b82f6",
+            "devices": devices,
         })
 
     return {
@@ -526,7 +553,7 @@ def get_floorplan_detail(name: str) -> dict:
         "image": doc.image,
         "image_width": doc.image_width,
         "image_height": doc.image_height,
-        "rooms": rooms,
+        "rooms": rooms_data,
     }
 
 

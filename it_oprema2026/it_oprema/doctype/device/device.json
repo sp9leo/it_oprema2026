@@ -23,10 +23,10 @@
      "location",
      "company",
     "section_break_floorplan",
-    "floorplan",
-    "column_break_floorplan",
-    "map_x",
-    "map_y",
+     "room",
+     "column_break_floorplan",
+     "map_x",
+     "map_y",
    "section_break_svxi",
    "device_group_members",
    "section_break_mord",
@@ -291,21 +291,21 @@
     "options": "Location",
     "search_index": 1
    },
-  {
-   "fieldname": "section_break_floorplan",
-   "fieldtype": "Section Break",
-   "label": "Floorplan"
-  },
-  {
-   "fieldname": "floorplan",
-   "fieldtype": "Link",
-   "label": "Floorplan",
-   "options": "Floorplan"
-  },
-  {
-   "fieldname": "column_break_floorplan",
-   "fieldtype": "Column Break"
-  },
+   {
+    "fieldname": "section_break_floorplan",
+    "fieldtype": "Section Break",
+    "label": "Floorplan"
+   },
+   {
+    "fieldname": "room",
+    "fieldtype": "Link",
+    "label": "Room",
+    "options": "Room"
+   },
+   {
+    "fieldname": "column_break_floorplan",
+    "fieldtype": "Column Break"
+   },
   {
    "fieldname": "map_x",
    "fieldtype": "Int",

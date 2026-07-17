@@ -5,61 +5,55 @@
  "creation": "2026-07-17 00:00:00.000000",
  "doctype": "DocType",
  "engine": "InnoDB",
- "field_order": [
-  "title",
-  "image",
-  "column_break_dim",
-  "image_width",
-  "image_height",
-  "section_rooms",
-  "rooms"
- ],
- "fields": [
-  {
-   "fieldname": "title",
-   "fieldtype": "Data",
-   "in_list_view": 1,
-   "label": "Title",
-   "reqd": 1,
-   "unique": 1
-  },
-  {
-   "fieldname": "image",
-   "fieldtype": "Attach Image",
-   "label": "Floorplan Image",
-   "reqd": 1
-  },
-  {
-   "fieldname": "column_break_dim",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "image_width",
-   "fieldtype": "Int",
-   "label": "Image Width (px)",
-   "reqd": 1
-  },
-  {
-   "fieldname": "image_height",
-   "fieldtype": "Int",
-   "label": "Image Height (px)",
-   "reqd": 1
-  },
-  {
-   "fieldname": "section_rooms",
-   "fieldtype": "Section Break"
-  },
-  {
-   "fieldname": "rooms",
-   "fieldtype": "Table",
-   "label": "Rooms",
-   "options": "Floorplan Room"
-  }
- ],
+  "field_order": [
+   "title",
+   "image",
+   "column_break_dim",
+   "image_width",
+   "image_height"
+  ],
+  "fields": [
+   {
+    "fieldname": "title",
+    "fieldtype": "Data",
+    "in_list_view": 1,
+    "label": "Title",
+    "reqd": 1,
+    "unique": 1
+   },
+   {
+    "fieldname": "image",
+    "fieldtype": "Attach Image",
+    "label": "Floorplan Image",
+    "reqd": 1
+   },
+   {
+    "fieldname": "column_break_dim",
+    "fieldtype": "Column Break"
+   },
+   {
+    "fieldname": "image_width",
+    "fieldtype": "Int",
+    "label": "Image Width (px)",
+    "reqd": 1
+   },
+   {
+    "fieldname": "image_height",
+    "fieldtype": "Int",
+    "label": "Image Height (px)",
+    "reqd": 1
+   }
+  ],
  "grid_page_length": 50,
  "image_field": "image",
  "index_web_pages_for_search": 1,
- "links": [],
+  "links": [
+   {
+    "group": "Rooms",
+    "link_doctype": "Room",
+    "link_fieldname": "floorplan"
+   }
+  ],
  "modified": "2026-07-17 00:00:00.000000",
  "modified_by": "Administrator",
  "module": "IT_Oprema",

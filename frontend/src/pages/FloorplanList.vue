@@ -22,7 +22,7 @@
         </div>
         <div class="p-3">
           <div class="font-medium text-gray-800">{{ p.title }}</div>
-          <div class="text-xs text-gray-500 mt-1">{{ p.image_width }} × {{ p.image_height }} px</div>
+          <div class="text-xs text-gray-500 mt-1">{{ p.room_count }} room{{ p.room_count !== 1 ? 's' : '' }} &middot; {{ p.image_width }} &times; {{ p.image_height }} px</div>
         </div>
       </router-link>
     </div>

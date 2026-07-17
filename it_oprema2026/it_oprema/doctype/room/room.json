@@ -1,0 +1,104 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "format:{floorplan}-{room_name}",
+ "creation": "2026-07-17 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "room_name",
+  "floorplan",
+  "column_break_bounds",
+  "bounds_top",
+  "bounds_left",
+  "bounds_bottom",
+  "bounds_right",
+  "color"
+ ],
+ "fields": [
+  {
+   "fieldname": "room_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Room Name",
+   "reqd": 1
+  },
+  {
+   "fieldname": "floorplan",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Floorplan",
+   "options": "Floorplan",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_bounds",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "bounds_top",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Bounds Top",
+   "reqd": 1
+  },
+  {
+   "fieldname": "bounds_left",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Bounds Left",
+   "reqd": 1
+  },
+  {
+   "fieldname": "bounds_bottom",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Bounds Bottom",
+   "reqd": 1
+  },
+  {
+   "fieldname": "bounds_right",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Bounds Right",
+   "reqd": 1
+  },
+  {
+   "default": "#3b82f6",
+   "fieldname": "color",
+   "fieldtype": "Color",
+   "label": "Color"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [{
+  "group": "Devices",
+  "link_doctype": "Device",
+  "link_fieldname": "room"
+ }],
+ "modified": "2026-07-17 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "IT_Oprema",
+ "name": "Room",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "room_name",
+ "track_changes": 1
+}
