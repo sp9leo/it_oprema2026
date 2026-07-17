@@ -475,6 +475,61 @@ def get_device_audit_log(device: str) -> list:
     return comments
 
 
+# --- Floorplans ---
+
+@frappe.whitelist()
+def get_floorplans() -> list:
+    return frappe.db.sql(
+        """
+        SELECT name, title, image, image_width, image_height
+        FROM `tabFloorplan`
+        ORDER BY title ASC
+        """,
+        as_dict=True,
+    )
+
+
+@frappe.whitelist()
+def get_floorplan_detail(name: str) -> dict:
+    doc = frappe.get_doc("Floorplan", name)
+
+    rooms = []
+    for r in doc.rooms:
+        devices = frappe.db.sql(
+            """
+            SELECT name AS device_id, device_name, device_inventory_code, device_group, status,
+                   map_x, map_y
+            FROM `tabDevice`
+            WHERE floorplan = %s
+            """,
+            doc.name,
+            as_dict=True,
+        )
+
+        room_devices = [
+            d for d in devices
+            if d.map_x is not None and d.map_y is not None
+            and r.bounds_left <= d.map_x <= r.bounds_right
+            and r.bounds_top <= d.map_y <= r.bounds_bottom
+        ]
+
+        rooms.append({
+            "room_name": r.room_name,
+            "bounds": [[r.bounds_top, r.bounds_left], [r.bounds_bottom, r.bounds_right]],
+            "color": r.color or "#3b82f6",
+            "devices": room_devices,
+        })
+
+    return {
+        "name": doc.name,
+        "title": doc.title,
+        "image": doc.image,
+        "image_width": doc.image_width,
+        "image_height": doc.image_height,
+        "rooms": rooms,
+    }
+
+
 # --- Map ---
 
 @frappe.whitelist()

@@ -75,6 +75,16 @@ const routes = [
     component: () => import('@/pages/BuildingMap.vue'),
   },
   {
+    path: '/floorplans',
+    name: 'FloorplanList',
+    component: () => import('@/pages/FloorplanList.vue'),
+  },
+  {
+    path: '/floorplans/:id',
+    name: 'FloorplanDetail',
+    component: () => import('@/pages/FloorplanDetail.vue'),
+  },
+  {
     path: '/:pathMatch(.*)*',
     redirect: (to) => {
       window.location.href = `//${window.location.hostname}:8000${to.fullPath}`
