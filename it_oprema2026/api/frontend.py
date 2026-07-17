@@ -473,3 +473,58 @@ def get_device_audit_log(device: str) -> list:
         order_by="creation DESC",
     )
     return comments
+
+
+# --- Map ---
+
+@frappe.whitelist()
+def get_map_data() -> dict:
+    locations = frappe.db.sql(
+        """
+        SELECT name, location_name, parent_location, location, latitude, longitude
+        FROM `tabLocation`
+        WHERE location IS NOT NULL AND location != ''
+        ORDER BY location_name ASC
+        """,
+        as_dict=True,
+    )
+
+    result = []
+    for loc in locations:
+        devices = frappe.db.sql(
+            """
+            SELECT name AS device_id, device_name, device_inventory_code, device_group, status
+            FROM `tabDevice`
+            WHERE location = %s
+            """,
+            loc.name,
+            as_dict=True,
+        )
+
+        coords = None
+        geo = loc.get("location")
+        if geo:
+            try:
+                parsed = frappe.parse_json(geo) if isinstance(geo, str) else geo
+                features = parsed.get("features", [])
+                if features:
+                    geom = features[0].get("geometry", {})
+                    if geom.get("type") == "Point":
+                        coords = geom["coordinates"]  # [lng, lat]
+            except Exception:
+                pass
+
+        if not coords and loc.latitude and loc.longitude:
+            coords = [float(loc.longitude), float(loc.latitude)]
+
+        if coords:
+            result.append({
+                "name": loc.name,
+                "location_name": loc.location_name,
+                "parent_location": loc.parent_location,
+                "coordinates": coords,
+                "device_count": len(devices),
+                "devices": devices,
+            })
+
+    return {"locations": result}

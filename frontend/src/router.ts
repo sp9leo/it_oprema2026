@@ -70,6 +70,11 @@ const routes = [
     component: () => import('@/pages/AuditLog.vue'),
   },
   {
+    path: '/map',
+    name: 'BuildingMap',
+    component: () => import('@/pages/BuildingMap.vue'),
+  },
+  {
     path: '/:pathMatch(.*)*',
     redirect: (to) => {
       window.location.href = `//${window.location.hostname}:8000${to.fullPath}`
