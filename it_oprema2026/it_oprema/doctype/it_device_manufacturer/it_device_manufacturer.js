@@ -6,17 +6,3 @@
 
 // 	},
 // });
-
-frappe.ui.form.on("IT-Device Manufacturer", "onload", function(frm) {
-    console.log("query  here");
-    frm.set_query("link_wwvr", function() {
-        return {
-            "filters": {
-                "name": ["in", ["Computer", "Device"]]
-
-
-            }
-                
-        };
-    });
-});
