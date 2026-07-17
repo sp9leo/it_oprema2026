@@ -43,7 +43,8 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, computed } from 'vue'
-import * as L from 'leaflet/dist/leaflet-src.esm.js'
+// @ts-ignore
+import L from 'leaflet/dist/leaflet'
 import 'leaflet/dist/leaflet.css'
 import { useFetch } from '@/composables/api'
 
