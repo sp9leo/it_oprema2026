@@ -60,6 +60,16 @@ const routes = [
     component: () => import('@/pages/InventoryDetail.vue'),
   },
   {
+    path: '/devices/:id/audit',
+    name: 'AuditLog',
+    component: () => import('@/pages/AuditLog.vue'),
+  },
+  {
+    path: '/audit',
+    name: 'AuditLogGlobal',
+    component: () => import('@/pages/AuditLog.vue'),
+  },
+  {
     path: '/:pathMatch(.*)*',
     redirect: (to) => {
       window.location.href = `//${window.location.hostname}:8000${to.fullPath}`

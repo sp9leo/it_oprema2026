@@ -4,6 +4,7 @@
       <button class="px-3 py-1.5 text-sm border border-gray-300 rounded-lg hover:bg-gray-50" @click="goBack">&larr; Back</button>
       <a :href="backendUrl" target="_blank" class="px-3 py-1.5 text-sm bg-gray-900 text-white rounded-lg hover:bg-gray-800">Edit in Desk</a>
       <button class="px-3 py-1.5 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 ml-auto" @click="showQR = true">QR Code</button>
+      <router-link :to="'/devices/' + name + '/audit'" class="px-3 py-1.5 text-sm border border-gray-300 rounded-lg hover:bg-gray-50">Audit Log</router-link>
     </div>
 
     <div v-if="showQR" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" @click.self="showQR = false">
@@ -13,7 +14,7 @@
           <button class="text-gray-400 hover:text-gray-600 text-xl leading-none" @click="showQR = false">&times;</button>
         </div>
         <div class="flex justify-center mb-4">
-          <img :src="qrUrl" alt="QR Code" class="w-48 h-48" />
+          <QRCodeLabel :label="{ id: name, name: detail.data.value?.device?.device_name || detail.data.value?.device?.device_id || name, inventory_code: detail.data.value?.device?.device_inventory_code, type: detail.data.value?.device?.is_computer ? 'Group Leader' : detail.data.value?.device?.parent_device ? 'Member' : 'Device' }" />
         </div>
         <p class="text-sm text-gray-500 text-center mb-4 break-all">{{ publicUrl }}</p>
         <button class="w-full px-3 py-2 text-sm bg-gray-900 text-white rounded-lg hover:bg-gray-800" @click="copyLink">Copy Link</button>
@@ -77,18 +78,35 @@
         </div>
 
         <div class="rounded-lg border bg-white p-4">
-          <h3 class="text-lg font-medium mb-3">Attachments ({{ detail.data.value.attachments?.length || 0 }})</h3>
-          <div v-if="detail.data.value.attachments?.length">
+          <h3 class="text-lg font-medium mb-3">Photos ({{ photos.length }})</h3>
+          <div v-if="photos.length" class="flex flex-wrap gap-2 mb-3">
+            <div v-for="p in photos" :key="p.name" class="relative">
+              <img :src="p.file_url" class="w-24 h-24 object-cover rounded-lg border" @click="previewPhoto = p.file_url" />
+            </div>
+          </div>
+          <div v-else class="text-sm text-gray-500 mb-3">No photos</div>
+          <label class="inline-flex items-center px-3 py-1.5 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer">
+            <svg viewBox="0 0 24 24" class="w-4 h-4 mr-1" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            Upload Photo
+            <input type="file" accept="image/*" class="hidden" @change="uploadPhoto" />
+          </label>
+        </div>
+
+        <div v-if="previewPhoto" class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4" @click.self="previewPhoto = ''">
+          <img :src="previewPhoto" class="max-w-[90vw] max-h-[90vh] object-contain rounded-lg" />
+        </div>
+
+        <div class="rounded-lg border bg-white p-4">
+          <h3 class="text-lg font-medium mb-3">Attachments ({{ attachments.length }})</h3>
+          <div v-if="attachments.length">
             <div
-              v-for="f in detail.data.value.attachments"
+              v-for="f in attachments"
               :key="f.name"
               class="flex items-center gap-2 py-2 border-b last:border-0 text-sm"
             >
               <svg viewBox="0 0 24 24" class="w-4 h-4 text-gray-500 shrink-0" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
                 <polyline points="14 2 14 8 20 8" />
-                <line x1="16" y1="13" x2="8" y2="13" />
-                <line x1="16" y1="17" x2="8" y2="17" />
               </svg>
               <a :href="f.file_url" target="_blank" class="text-blue-600 hover:underline">{{ f.file_name }}</a>
             </div>
@@ -97,7 +115,18 @@
         </div>
       </div>
 
-      <div class="rounded-lg border bg-white overflow-hidden">
+      <div class="rounded-lg border bg-white overflow-hidden mb-6">
+        <div class="px-4 py-3 border-b">
+          <h3 class="text-lg font-medium">Maintenance</h3>
+        </div>
+        <div class="p-4">
+          <MaintenanceLog :device="name" @add="showMaintenanceForm = true" />
+        </div>
+      </div>
+
+      <MaintenanceForm v-if="showMaintenanceForm" :device="name" @close="showMaintenanceForm = false" @saved="onMaintenanceSaved" />
+
+      <div class="rounded-lg border bg-white overflow-hidden mb-6">
         <div class="px-4 py-3 border-b flex items-center justify-between">
           <h3 class="text-lg font-medium">Location History</h3>
         </div>
@@ -165,7 +194,10 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { useFetch } from '@/composables/api'
+import { useFetch, apiPost } from '@/composables/api'
+import QRCodeLabel from '@/components/QRCodeLabel.vue'
+import MaintenanceLog from '@/components/MaintenanceLog.vue'
+import MaintenanceForm from '@/components/MaintenanceForm.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -173,13 +205,17 @@ const name = computed(() => route.params.id as string)
 const backendUrl = computed(() => `${window.location.protocol}//${window.location.hostname}:8000/app/device/${name.value}`)
 const showQR = ref(false)
 const publicUrl = computed(() => `${window.location.protocol}//${window.location.host}${router.resolve({ name: 'DevicePublic', params: { id: name.value } }).href}`)
-const qrUrl = computed(() => `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(publicUrl.value)}`)
+const showMaintenanceForm = ref(false)
+const previewPhoto = ref('')
 
 const detail = useFetch<any>('/api/method/it_oprema2026.api.frontend.get_device_detail', { name: name.value })
 
 const locationLog = useFetch<any>('/api/method/it_oprema2026.api.frontend.get_device_location_log', { device: name.value })
 
 const inventoryHistory = useFetch<any[]>('/api/method/it_oprema2026.api.frontend.get_device_inventory_history', { device: name.value })
+
+const photos = computed(() => (detail.data.value?.attachments || []).filter((f: any) => /\.(png|jpe?g|gif|webp|bmp|svg)$/i.test(f.file_name)))
+const attachments = computed(() => (detail.data.value?.attachments || []).filter((f: any) => !/\.(png|jpe?g|gif|webp|bmp|svg)$/i.test(f.file_name)))
 
 watch(name, (newName) => {
   detail.fetch({ name: newName })
@@ -208,6 +244,30 @@ function invStatusBadge(status: string): string {
     Missing: 'bg-red-100 text-red-700',
   }
   return map[status] || 'bg-gray-100 text-gray-600'
+}
+
+async function uploadPhoto(e: Event) {
+  const input = e.target as HTMLInputElement
+  const file = input.files?.[0]
+  if (!file) return
+
+  const formData = new FormData()
+  formData.append('file', file)
+  formData.append('doctype', 'Device')
+  formData.append('docname', name.value)
+  formData.append('is_private', '0')
+
+  await fetch('/api/method/upload_file', {
+    method: 'POST',
+    body: formData,
+  })
+  detail.fetch({ name: name.value })
+  input.value = ''
+}
+
+async function onMaintenanceSaved() {
+  showMaintenanceForm.value = false
+  detail.fetch({ name: name.value })
 }
 
 async function copyLink() {

@@ -27,6 +27,9 @@
       <table v-else-if="devices.data.value?.data?.length" class="w-full text-sm">
         <thead class="bg-gray-50 text-gray-600 text-left">
           <tr>
+            <th class="px-4 py-2 font-medium w-10">
+              <input type="checkbox" :checked="allSelected" @change="toggleAll" class="rounded" />
+            </th>
             <th class="px-4 py-2 font-medium">Inventory Code</th>
             <th class="px-4 py-2 font-medium">Name</th>
             <th class="px-4 py-2 font-medium">Group</th>
@@ -43,6 +46,9 @@
             class="hover:bg-gray-50 cursor-pointer"
             @click="goToDevice(d.name)"
           >
+            <td class="px-4 py-2.5" @click.stop>
+              <input type="checkbox" :value="d.name" v-model="selected" class="rounded" />
+            </td>
             <td class="px-4 py-2.5 font-medium">{{ d.device_inventory_code }}</td>
             <td class="px-4 py-2.5">{{ d.device_name || d.device_id }}</td>
             <td class="px-4 py-2.5">{{ d.device_group }}</td>
@@ -62,19 +68,82 @@
 
       <div v-else class="p-8 text-center text-gray-500">No devices found.</div>
     </div>
+
+    <BulkActionBar
+      :count="selected.length"
+      @change-status="showBulkStatus = true"
+      @print-qr="showBulkQR = true"
+      @bulk-delete="showBulkDelete = true"
+      @clear-selection="selected = []"
+    />
+
+    <div v-if="showBulkStatus" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" @click.self="showBulkStatus = false">
+      <div class="bg-white rounded-xl p-6 max-w-sm w-full shadow-xl">
+        <h3 class="text-lg font-medium mb-3">Change Status</h3>
+        <p class="text-sm text-gray-600 mb-3">Change status for <strong>{{ selected.length }}</strong> device(s):</p>
+        <select v-model="bulkNewStatus" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm mb-4">
+          <option v-for="s in statusOptions" :key="s" :value="s">{{ s }}</option>
+        </select>
+        <div class="flex gap-2 justify-end">
+          <button class="px-3 py-1.5 text-sm border border-gray-300 rounded-lg hover:bg-gray-50" @click="showBulkStatus = false">Cancel</button>
+          <button class="px-3 py-1.5 text-sm bg-gray-900 text-white rounded-lg hover:bg-gray-800 disabled:opacity-50" :disabled="bulkLoading" @click="doBulkStatus">{{ bulkLoading ? 'Saving...' : 'Apply' }}</button>
+        </div>
+      </div>
+    </div>
+
+    <div v-if="showBulkDelete" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" @click.self="showBulkDelete = false">
+      <div class="bg-white rounded-xl p-6 max-w-sm w-full shadow-xl">
+        <h3 class="text-lg font-medium mb-3">Delete Selected?</h3>
+        <p class="text-sm text-gray-600 mb-4">Are you sure you want to delete <strong>{{ selected.length }}</strong> device(s)?</p>
+        <div class="flex gap-2 justify-end">
+          <button class="px-3 py-1.5 text-sm border border-gray-300 rounded-lg hover:bg-gray-50" @click="showBulkDelete = false">Cancel</button>
+          <button class="px-3 py-1.5 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50" :disabled="bulkLoading" @click="doBulkDelete">{{ bulkLoading ? 'Deleting...' : 'Delete' }}</button>
+        </div>
+      </div>
+    </div>
+
+    <div v-if="showBulkQR" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" @click.self="showBulkQR = false">
+      <div class="bg-white rounded-xl p-6 max-w-2xl w-full shadow-xl max-h-[80vh] overflow-y-auto">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="text-lg font-medium">QR Labels ({{ selected.length }})</h3>
+          <button class="px-3 py-1.5 text-sm border border-gray-300 rounded-lg hover:bg-gray-50" @click="printBulkQR">Print</button>
+        </div>
+        <div class="flex flex-wrap gap-3">
+          <QRCodeLabel
+            v-for="id in selected"
+            :key="id"
+            :label="getLabel(id)"
+            print-mode
+          />
+        </div>
+        <div class="flex justify-end mt-4">
+          <button class="px-3 py-1.5 text-sm border border-gray-300 rounded-lg hover:bg-gray-50" @click="showBulkQR = false">Close</button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
-import { useFetch } from '@/composables/api'
+import { useFetch, apiPost } from '@/composables/api'
+import BulkActionBar from '@/components/BulkActionBar.vue'
+import QRCodeLabel from '@/components/QRCodeLabel.vue'
 
 const router = useRouter()
 const hostname = window.location.hostname
 const search = ref('')
 const groupFilter = ref('')
 const groupOptions = ref<string[]>([])
+const selected = ref<string[]>([])
+const showBulkStatus = ref(false)
+const showBulkDelete = ref(false)
+const showBulkQR = ref(false)
+const bulkNewStatus = ref('Active')
+const bulkLoading = ref(false)
+
+const statusOptions = ['Active', 'Inactive', 'Maintenance', 'Retired']
 
 const devices = useFetch<any>('/api/method/it_oprema2026.api.frontend.get_devices', undefined, {
   onSuccess(data) {
@@ -82,6 +151,28 @@ const devices = useFetch<any>('/api/method/it_oprema2026.api.frontend.get_device
     groupOptions.value = groups.sort()
   },
 })
+
+const allSelected = computed(() => devices.data.value?.data?.length === selected.value.length && selected.value.length > 0)
+
+function toggleAll() {
+  if (allSelected.value) {
+    selected.value = []
+  } else {
+    selected.value = devices.data.value?.data?.map((d: any) => d.name) || []
+  }
+}
+
+function getLabel(name: string) {
+  const d = devices.data.value?.data?.find((x: any) => x.name === name)
+  if (!d) return { name, inventory_code: '', type: '', serial: '' }
+  return {
+    id: d.name,
+    name: d.device_name || d.device_id,
+    inventory_code: d.device_inventory_code,
+    type: d.is_computer ? 'Group Leader' : d.parent_device ? 'Member' : 'Device',
+    serial: d.device_serial,
+  }
+}
 
 function loadDevices() {
   const filters: Record<string, string> = {}
@@ -97,5 +188,37 @@ function debouncedSearch() {
 
 function goToDevice(name: string) {
   router.push({ name: 'DeviceDetail', params: { id: name } })
+}
+
+async function doBulkStatus() {
+  bulkLoading.value = true
+  try {
+    for (const name of selected.value) {
+      await apiPost('/api/method/it_oprema2026.api.frontend.update_device_status', { name, status: bulkNewStatus.value })
+    }
+    selected.value = []
+    showBulkStatus.value = false
+    loadDevices()
+  } finally {
+    bulkLoading.value = false
+  }
+}
+
+async function doBulkDelete() {
+  bulkLoading.value = true
+  try {
+    for (const name of selected.value) {
+      await apiPost('/api/method/it_oprema2026.api.frontend.delete_device', { name })
+    }
+    selected.value = []
+    showBulkDelete.value = false
+    loadDevices()
+  } finally {
+    bulkLoading.value = false
+  }
+}
+
+function printBulkQR() {
+  window.print()
 }
 </script>

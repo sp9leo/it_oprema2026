@@ -6,6 +6,7 @@
       <router-link to="/devices" class="px-4 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 bg-white">All Devices</router-link>
       <router-link to="/loans" class="px-4 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 bg-white">Loans</router-link>
       <router-link to="/inventory" class="px-4 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 bg-white">Inventory Checks</router-link>
+      <router-link to="/audit" class="px-4 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 bg-white">Audit Log</router-link>
     </div>
 
     <div v-if="stats.loading.value" class="text-gray-500">Loading...</div>

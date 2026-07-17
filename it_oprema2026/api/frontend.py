@@ -396,3 +396,80 @@ def get_device_inventory_history(device: str) -> list:
         item["check_date"] = c.get("date", "")
 
     return items
+
+
+@frappe.whitelist()
+def update_device_status(name: str, status: str) -> dict:
+    frappe.db.set_value("Device", name, "status", status)
+    frappe.get_doc("Device", name).add_comment("Info", f"Status changed to {status}.")
+    return {"ok": True}
+
+
+@frappe.whitelist()
+def delete_device(name: str) -> dict:
+    frappe.delete_doc("Device", name, ignore_permissions=True)
+    return {"ok": True}
+
+
+# --- Maintenance ---
+
+@frappe.whitelist()
+def get_maintenance_records(device: str) -> list:
+    records = frappe.db.sql(
+        """
+        SELECT name, device, maintenance_type, description, maintenance_date,
+               scheduled_date, status, performed_by, cost, notes
+        FROM `tabMaintenance Record`
+        WHERE device = %s
+        ORDER BY maintenance_date DESC
+        """,
+        device,
+        as_dict=True,
+    )
+    return records
+
+
+@frappe.whitelist()
+def create_maintenance_record(
+    device: str,
+    maintenance_type: str = "Other",
+    description: str = "",
+    maintenance_date: str | None = None,
+    scheduled_date: str | None = None,
+    performed_by: str = "",
+    cost: float = 0.0,
+    notes: str = "",
+) -> dict:
+    doc = frappe.get_doc({
+        "doctype": "Maintenance Record",
+        "device": device,
+        "maintenance_type": maintenance_type,
+        "description": description,
+        "maintenance_date": maintenance_date or frappe.utils.now_datetime(),
+        "scheduled_date": scheduled_date,
+        "status": "Completed",
+        "performed_by": performed_by,
+        "cost": cost,
+        "notes": notes,
+    })
+    doc.insert(ignore_permissions=True)
+    frappe.get_doc("Device", device).add_comment(
+        "Info", f"Maintenance record created: {maintenance_type} - {description}"
+    )
+    return doc.as_dict()
+
+
+# --- Audit Log ---
+
+@frappe.whitelist()
+def get_device_audit_log(device: str) -> list:
+    comments = frappe.get_all(
+        "Comment",
+        filters={
+            "reference_doctype": "Device",
+            "reference_name": device,
+        },
+        fields=["name", "comment_type", "content", "owner", "creation"],
+        order_by="creation DESC",
+    )
+    return comments
