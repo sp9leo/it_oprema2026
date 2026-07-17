@@ -3,39 +3,77 @@
     <div class="flex items-center gap-2 mb-4">
       <button class="px-3 py-1.5 text-sm border border-gray-300 rounded-lg hover:bg-gray-50" @click="$router.push('/floorplans')">&larr; Back</button>
       <h2 class="text-xl font-semibold text-gray-800">{{ plan.title }}</h2>
-      <div class="ml-auto flex items-center gap-2">
-        <button
-          v-if="!pickerMode"
-          class="px-3 py-1.5 text-sm border border-gray-300 rounded-lg hover:bg-gray-50"
-          @click="startPicker"
-        >Place Device</button>
-        <button
-          v-else
-          class="px-3 py-1.5 text-sm bg-red-50 text-red-700 border border-red-200 rounded-lg hover:bg-red-100"
-          @click="cancelPicker"
-        >Cancel</button>
-      </div>
-    </div>
-
-    <div v-if="pickerMode" class="mb-3">
-      <select v-model="pickerDeviceId" class="w-full max-w-xs px-3 py-2 text-sm border rounded-lg">
-        <option value="">Select a device to place...</option>
-        <option v-for="d in unplacedDevices" :key="d.name" :value="d.name">
-          {{ d.device_name || d.device_id }} ({{ d.device_inventory_code }})
-        </option>
-      </select>
     </div>
 
     <div v-if="loading" class="text-gray-500 text-center py-8">Loading floorplan...</div>
 
-    <div v-else-if="!plan.image" class="text-gray-500 text-center py-8">Floorplan not found.</div>
+    <template v-else-if="plan.image">
+      <div class="flex gap-4">
+        <div class="flex-1 min-w-0">
+          <div class="rounded-lg border bg-white overflow-hidden" style="height: calc(100vh - 200px); min-height: 600px">
+            <div ref="mapContainer" class="w-full h-full"></div>
+          </div>
+        </div>
 
-    <div v-else class="rounded-lg border bg-white overflow-hidden relative" style="height: calc(100vh - 200px); min-height: 500px">
-      <div ref="mapContainer" class="w-full h-full"></div>
-      <div v-if="pickerMode" class="absolute top-2 left-2 bg-white/90 px-3 py-1.5 rounded-lg text-sm text-gray-600 shadow">
-        Click on the map to place the selected device
+        <div class="w-72 shrink-0 space-y-4">
+          <div class="rounded-lg border bg-white p-4">
+            <div class="text-xs font-medium text-gray-400 uppercase tracking-wider mb-2">Legend</div>
+            <div v-for="item in legend" :key="item.status" class="flex items-center gap-2 py-1">
+              <span class="w-3 h-3 rounded-full shrink-0" :style="{ background: item.color }"></span>
+              <span class="text-xs text-gray-600">{{ item.label }}</span>
+            </div>
+            <div class="mt-2 pt-2 border-t text-xs text-gray-400">
+              {{ totalDevices }} device{{ totalDevices !== 1 ? 's' : '' }} on map
+            </div>
+          </div>
+
+          <div v-if="!selectedRoom" class="rounded-lg border bg-white">
+            <div class="px-4 py-2 border-b text-sm font-medium text-gray-700">Rooms</div>
+            <div class="divide-y max-h-[400px] overflow-y-auto">
+              <button
+                v-for="room in plan.rooms"
+                :key="room.room_name"
+                class="w-full text-left px-4 py-2 hover:bg-gray-50 transition-colors"
+                @click="selectRoom(room)"
+              >
+                <div class="flex items-center gap-2">
+                  <span class="w-3 h-3 rounded shrink-0" :style="{ background: room.color }"></span>
+                  <span class="text-sm text-gray-700">{{ room.room_name }}</span>
+                </div>
+                <div class="text-xs text-gray-400 ml-5">{{ room.devices.length }} device{{ room.devices.length !== 1 ? 's' : '' }}</div>
+              </button>
+            </div>
+          </div>
+
+          <div v-else class="rounded-lg border bg-white">
+            <div class="px-4 py-2 border-b text-sm font-medium text-gray-700 flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <span class="w-3 h-3 rounded shrink-0" :style="{ background: selectedRoom.color }"></span>
+                {{ selectedRoom.room_name }}
+              </div>
+              <button class="text-gray-400 hover:text-gray-600 text-sm" @click="selectedRoom = null">&times;</button>
+            </div>
+            <div v-if="roomDevices.length" class="divide-y max-h-[350px] overflow-y-auto">
+              <div
+                v-for="d in roomDevices"
+                :key="d.device_id"
+                class="px-4 py-2 hover:bg-gray-50 cursor-pointer"
+                @click="selectedDevice = d"
+              >
+                <div class="flex items-center justify-between">
+                  <span class="text-sm font-medium text-gray-800 truncate">{{ d.device_name || d.device_id }}</span>
+                  <span class="w-2 h-2 rounded-full shrink-0" :class="statusDot(d.status)" :title="d.status"></span>
+                </div>
+                <div class="text-xs text-gray-400 mt-0.5">{{ d.device_inventory_code }} &middot; {{ d.device_group || '-' }}</div>
+              </div>
+            </div>
+            <div v-else class="p-4 text-sm text-gray-400 text-center">No devices in this room</div>
+          </div>
+        </div>
       </div>
-    </div>
+    </template>
+
+    <div v-else class="text-gray-500 text-center py-8">Floorplan not found.</div>
 
     <div v-if="selectedDevice" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" @click.self="selectedDevice = null">
       <div class="bg-white rounded-xl p-6 max-w-sm w-full shadow-xl">
@@ -45,11 +83,8 @@
         </div>
         <p class="text-sm text-gray-600 mb-1">Inventory: {{ selectedDevice.device_inventory_code }}</p>
         <p class="text-sm text-gray-600 mb-1">Group: {{ selectedDevice.device_group || '-' }}</p>
-        <p class="text-sm text-gray-600 mb-4">Status: <span :class="statusDot(selectedDevice.status)" class="w-2 h-2 rounded-full inline-block ml-1"></span> {{ selectedDevice.status }}</p>
-        <div class="flex gap-2">
-          <router-link :to="'/devices/' + selectedDevice.device_id" class="text-sm text-blue-600 hover:underline">View Details &rarr;</router-link>
-          <button v-if="selectedDevice.map_x != null && selectedDevice.map_y != null" class="text-sm text-red-600 hover:underline ml-auto" @click="removeDevicePosition(selectedDevice)">Remove from map</button>
-        </div>
+        <p class="text-sm text-gray-600 mb-4">Status: <span class="w-2 h-2 rounded-full inline-block ml-1" :class="statusDot(selectedDevice.status)"></span> {{ selectedDevice.status }}</p>
+        <router-link :to="'/devices/' + selectedDevice.device_id" class="text-sm text-blue-600 hover:underline">View Details &rarr;</router-link>
       </div>
     </div>
   </div>
@@ -60,40 +95,43 @@ import { ref, computed, onMounted, onUnmounted, watch, nextTick } from 'vue'
 import { useRoute } from 'vue-router'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
-import { apiGet, apiPost } from '@/composables/api'
+import { apiGet } from '@/composables/api'
 
 const route = useRoute()
 const mapContainer = ref<HTMLElement | null>(null)
 const plan = ref<any>({})
 const loading = ref(true)
 const selectedDevice = ref<any>(null)
-const pickerMode = ref(false)
-const pickerDeviceId = ref('')
+const selectedRoom = ref<any>(null)
 
 let map: L.Map | null = null
-let deviceMarkers: L.CircleMarker[] = []
+
+const statusColors: Record<string, string> = { Active: '#4CAF50', Inactive: '#9E9E9E', Maintenance: '#FF9800', Retired: '#F44336' }
+
+const legend = [
+  { status: 'Active', label: 'Active', color: '#4CAF50' },
+  { status: 'Inactive', label: 'Inactive', color: '#9E9E9E' },
+  { status: 'Maintenance', label: 'Maintenance', color: '#FF9800' },
+  { status: 'Retired', label: 'Retired', color: '#F44336' },
+]
+
+const totalDevices = computed(() => {
+  let total = 0
+  for (const r of plan.value.rooms || []) total += r.devices.length
+  return total
+})
+
+const roomDevices = computed(() => selectedRoom.value?.devices || [])
 
 onMounted(() => loadPlan())
 
-watch(() => route.params.id, () => { pickerMode.value = false; loadPlan() })
-
-const unplacedDevices = computed(() => {
-  const placed = new Set<string>()
-  for (const room of plan.value.rooms || []) {
-    for (const d of room.devices) placed.add(d.device_id)
-  }
-  return (plan.value._allDevices || []).filter((d: any) => !placed.has(d.device_id))
-})
+watch(() => route.params.id, () => { selectedRoom.value = null; loadPlan() })
 
 async function loadPlan() {
   loading.value = true
   const id = route.params.id as string
   const data = await apiGet('/api/method/it_oprema2026.api.frontend.get_floorplan_detail', { name: id })
   plan.value = data || {}
-  if (data) {
-    const all = await apiGet<any[]>('/api/method/it_oprema2026.api.frontend.get_devices', { limit: 9999 })
-    plan.value._allDevices = all?.data || []
-  }
   loading.value = false
   if (data?.image) await nextTick(initMap)
 }
@@ -119,11 +157,8 @@ function initMap() {
   L.imageOverlay(plan.value.image, imageBounds, { pane: 'floorplan-bg' }).addTo(map)
   map.fitBounds(imageBounds)
 
-  map.on('click', (e: L.LeafletMouseEvent) => {
-    if (pickerMode.value && pickerDeviceId.value) {
-      placeDevice(pickerDeviceId.value, Math.round(e.latlng.lng), Math.round(e.latlng.lat))
-    }
-  })
+  const roomsLayer = L.layerGroup().addTo(map)
+  const markersLayer = L.layerGroup().addTo(map)
 
   for (const room of plan.value.rooms || []) {
     const bounds: L.LatLngBoundsExpression = room.bounds
@@ -135,7 +170,8 @@ function initMap() {
     })
     rect.on('mouseover', function () { this.setStyle({ fillOpacity: 0.2, weight: 3 }) })
     rect.on('mouseout', function () { this.setStyle({ fillOpacity: 0.08, weight: 2 }) })
-    rect.addTo(map)
+    rect.on('click', () => selectRoom(room))
+    roomsLayer.addLayer(rect)
 
     const center: L.LatLngExpression = [
       (room.bounds[0][0] + room.bounds[1][0]) / 2,
@@ -150,20 +186,21 @@ function initMap() {
       iconSize: [120, 40],
       iconAnchor: [60, 20],
     })
-    L.marker(center, { icon: label }).addTo(map)
+    L.marker(center, { icon: label }).addTo(roomsLayer)
 
-    const [top, left] = room.bounds[0]
-    const [bottom, right] = room.bounds[1]
+    const [top, left, bottom, right] = [room.bounds[0][0], room.bounds[0][1], room.bounds[1][0], room.bounds[1][1]]
+    const roomW = right - left
     let col = 0
-    const statusColor: Record<string, string> = { Active: '#4CAF50', Inactive: '#9E9E9E', Maintenance: '#FF9800', Retired: '#F44336' }
 
     for (const d of room.devices) {
-      const color = statusColor[d.status] || '#9E9E9E'
+      const color = statusColors[d.status] || '#9E9E9E'
       let mx = d.map_x
       let my = d.map_y
       if (mx == null || my == null) {
-        mx = left + 20 + (col % 5) * 55
-        my = top + 20 + Math.floor(col / 5) * 45
+        const padding = 20
+        const cols = Math.max(1, Math.floor(roomW / 55))
+        mx = left + padding + (col % cols) * 55
+        my = top + padding + Math.floor(col / cols) * 45
         col++
       }
       const marker = L.circleMarker([my, mx], {
@@ -172,46 +209,16 @@ function initMap() {
         weight: 2,
         fillColor: color,
         fillOpacity: 0.9,
-      }).addTo(map)
+      })
       marker.bindTooltip(d.device_name || d.device_id, { direction: 'top' })
       marker.on('click', () => { selectedDevice.value = d })
-      deviceMarkers.push(marker)
+      markersLayer.addLayer(marker)
     }
   }
 }
 
-async function placeDevice(deviceName: string, mapX: number, mapY: number) {
-  const res = await apiPost('/api/method/it_oprema2026.api.frontend.update_device_floorplan', {
-    name: deviceName,
-    map_x: mapX,
-    map_y: mapY,
-  })
-  if (res?.ok) {
-    pickerDeviceId.value = ''
-    loadPlan()
-  }
-}
-
-async function removeDevicePosition(d: any) {
-  const res = await apiPost('/api/method/it_oprema2026.api.frontend.update_device_floorplan', {
-    name: d.device_id,
-    map_x: null,
-    map_y: null,
-  })
-  if (res?.ok) {
-    selectedDevice.value = null
-    loadPlan()
-  }
-}
-
-function startPicker() {
-  pickerMode.value = true
-  pickerDeviceId.value = ''
-}
-
-function cancelPicker() {
-  pickerMode.value = false
-  pickerDeviceId.value = ''
+function selectRoom(room: any) {
+  selectedRoom.value = room
 }
 
 onUnmounted(() => { if (map) { map.remove(); map = null } })
