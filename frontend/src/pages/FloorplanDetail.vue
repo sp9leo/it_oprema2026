@@ -29,7 +29,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, watch } from 'vue'
+import { ref, onMounted, onUnmounted, watch, nextTick } from 'vue'
 import { useRoute } from 'vue-router'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
@@ -53,7 +53,7 @@ async function loadPlan() {
   const data = await apiGet('/api/method/it_oprema2026.api.frontend.get_floorplan_detail', { name: id })
   plan.value = data || {}
   loading.value = false
-  if (data?.image) initMap()
+  if (data?.image) await nextTick(initMap)
 }
 
 function initMap() {
