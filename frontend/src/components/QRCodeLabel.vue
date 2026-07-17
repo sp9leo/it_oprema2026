@@ -1,6 +1,6 @@
 <template>
   <div ref="labelRef" class="inline-flex items-center gap-3 p-3 border border-gray-200 rounded-lg bg-white print:break-inside-avoid print:m-2">
-    <canvas ref="qrRef" />
+    <img :src="qrUrl" alt="QR" class="shrink-0" :style="{ width: qrSize + 'px', height: qrSize + 'px' }" />
     <div class="leading-tight">
       <div class="font-bold text-sm">{{ label.inventory_code || label.name }}</div>
       <div class="text-xs text-gray-700">{{ label.name }}</div>
@@ -11,29 +11,19 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue'
-import QRCode from 'qrcode'
+import { computed } from 'vue'
 
 const props = defineProps<{
   label: { name: string; inventory_code?: string; type?: string; serial?: string; id?: string }
   printMode?: boolean
 }>()
 
-const labelRef = ref<HTMLElement | null>(null)
-const qrRef = ref<HTMLCanvasElement | null>(null)
+const qrSize = computed(() => props.printMode ? 120 : 80)
 
-onMounted(() => generateQR())
-watch(() => props.label, () => generateQR(), { deep: true })
-
-function generateQR() {
-  if (!qrRef.value) return
+const qrUrl = computed(() => {
   const url = `${window.location.origin}${window.location.pathname.startsWith('/it_oprema2026') ? '/it_oprema2026' : ''}/d/${props.label.id || props.label.name}`
-  QRCode.toCanvas(qrRef.value, url, {
-    width: props.printMode ? 120 : 80,
-    margin: 1,
-    color: { dark: '#000000', light: '#ffffff' },
-  })
-}
+  return `https://api.qrserver.com/v1/create-qr-code/?size=${qrSize.value}x${qrSize.value}&data=${encodeURIComponent(url)}`
+})
 </script>
 
 <style>
