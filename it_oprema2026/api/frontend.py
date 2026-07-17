@@ -483,7 +483,6 @@ def get_map_data() -> dict:
         """
         SELECT name, location_name, parent_location, location, latitude, longitude
         FROM `tabLocation`
-        WHERE location IS NOT NULL AND location != ''
         ORDER BY location_name ASC
         """,
         as_dict=True,
@@ -515,14 +514,16 @@ def get_map_data() -> dict:
         if not geometry and loc.latitude and loc.longitude:
             geometry = {"type": "Point", "coordinates": [float(loc.longitude), float(loc.latitude)]}
 
-        if geometry:
-            result.append({
-                "name": loc.name,
-                "location_name": loc.location_name,
-                "parent_location": loc.parent_location,
-                "geometry": geometry,
-                "device_count": len(devices),
-                "devices": devices,
-            })
+        if not geometry:
+            continue
+
+        result.append({
+            "name": loc.name,
+            "location_name": loc.location_name,
+            "parent_location": loc.parent_location,
+            "geometry": geometry,
+            "device_count": len(devices),
+            "devices": devices,
+        })
 
     return {"locations": result}

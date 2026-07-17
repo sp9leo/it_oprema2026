@@ -7,8 +7,14 @@
       </div>
     </div>
 
-    <div class="rounded-lg border bg-white overflow-hidden" style="height: calc(100vh - 200px); min-height: 500px">
+    <div class="rounded-lg border bg-white overflow-hidden relative" style="height: calc(100vh - 200px); min-height: 500px">
       <div ref="mapContainer" class="w-full h-full"></div>
+      <div v-if="!loading && !locations.length" class="absolute inset-0 flex items-center justify-center bg-white/80">
+        <div class="text-center text-gray-500">
+          <p>No locations with coordinates found.</p>
+          <p class="text-sm mt-1">Add locations in <a href="/app/location" class="text-blue-600 hover:underline">Frappe Desk → Location</a> and set their Geolocation field.</p>
+        </div>
+      </div>
     </div>
 
     <div v-if="selectedLocation" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" @click.self="selectedLocation = null">
@@ -50,17 +56,20 @@ import { useFetch } from '@/composables/api'
 const mapContainer = ref<HTMLElement | null>(null)
 const selectedLocation = ref<any>(null)
 const locations = ref<any[]>([])
+const loading = ref(true)
 
 let map: L.Map | null = null
 
 const mapData = useFetch<any>('/api/method/it_oprema2026.api.frontend.get_map_data', undefined, {
   onSuccess(data) {
+    loading.value = false
     locations.value = data?.locations || []
     initMap()
   },
 })
 
 onMounted(() => {
+  loading.value = false
   if (mapData.data.value) {
     locations.value = mapData.data.value.locations || []
     initMap()
