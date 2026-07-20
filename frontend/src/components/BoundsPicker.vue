@@ -68,7 +68,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 
-defineProps({
+const props = defineProps({
   points: { type: Array, default: () => [] },
 })
 
