@@ -1,9 +1,8 @@
 ﻿<template>
-  <div class="w-full h-full relative">
+  <div class="w-full h-full relative" :class="{ 'cursor-crosshair': pickerMode }">
     <div
       ref="mapContainer"
       class="w-full h-full min-h-[500px] bg-gray-200 rounded-xl overflow-hidden"
-      :class="{ 'cursor-crosshair': pickerMode }"
     />
   </div>
 </template>
@@ -63,7 +62,7 @@ function initMap() {
   })
 
   const imageBounds: L.LatLngBoundsExpression = [[0, 0], [imgH, imgW]]
-  L.imageOverlay(props.floorplan.image, imageBounds, { zIndex: 1 }).addTo(map)
+  L.imageOverlay(props.floorplan.image, imageBounds).addTo(map)
   map.fitBounds(imageBounds)
 
   roomsLayer = L.layerGroup().addTo(map)
@@ -201,7 +200,7 @@ watch(() => props.assets, () => {
 }, { deep: true })
 
 watch(() => props.pickerMode, () => {
-  if (map) { setupPicker(); map.invalidateSize() }
+  if (map) setupPicker()
 })
 
 watch(() => props.pickerPoints, () => { if (map) drawPickerPreview() }, { deep: true })
