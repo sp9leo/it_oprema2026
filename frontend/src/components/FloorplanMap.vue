@@ -53,8 +53,12 @@ function initMap() {
   })
 
   const imageBounds: L.LatLngBoundsExpression = [[0, 0], [imgH, imgW]]
-  L.imageOverlay(props.floorplan.image, imageBounds).addTo(map)
+  L.imageOverlay(props.floorplan.image, imageBounds, { zIndex: 1 }).addTo(map)
   map.fitBounds(imageBounds)
+
+  const markersPane = map.createPane('markers')
+  markersPane.style.zIndex = 700
+  markersPane.style.pointerEvents = 'auto'
 
   roomsLayer = L.layerGroup().addTo(map)
   markersLayer = L.layerGroup().addTo(map)
@@ -84,7 +88,7 @@ function drawPickerPreview() {
 
   for (const pt of props.pickerPoints) {
     const marker = L.circleMarker([pt.y, pt.x], {
-      radius: 6, color: '#D32F2F', fillColor: '#F44336', fillOpacity: 0.8, weight: 2,
+      pane: 'markers', radius: 6, color: '#D32F2F', fillColor: '#F44336', fillOpacity: 0.8, weight: 2,
     })
     marker.bindTooltip(`[${pt.y}, ${pt.x}]`, { permanent: true, direction: 'top', offset: [0, -8] })
     pickerLayer.addLayer(marker)
@@ -159,7 +163,7 @@ function drawMarkers() {
 
       const color = statusColors[d.status] || '#9E9E9E'
       const marker = L.circleMarker([y, x], {
-        radius: 7, color: '#fff', weight: 2, fillColor: color, fillOpacity: 0.9,
+        pane: 'markers', radius: 7, color: '#fff', weight: 2, fillColor: color, fillOpacity: 0.9,
       })
       marker.bindTooltip(d.device_name || d.device_id, { direction: 'top' })
       marker.bindPopup(`
@@ -175,7 +179,7 @@ function drawMarkers() {
 
       if (props.highlightAssetId && d.device_id === props.highlightAssetId) {
         const pulseRing = L.circleMarker([y, x], {
-          radius: 18, color: '#D32F2F', fillColor: '#F44336', fillOpacity: 0.2, weight: 3,
+          pane: 'markers', radius: 18, color: '#D32F2F', fillColor: '#F44336', fillOpacity: 0.2, weight: 3,
         })
         markersLayer!.addLayer(pulseRing)
       }
@@ -193,7 +197,9 @@ watch(() => props.assets, () => {
   if (map) { drawRooms(); drawMarkers() }
 }, { deep: true })
 
-watch(() => props.pickerMode, () => { if (map) setupPicker() })
+watch(() => props.pickerMode, () => {
+  if (map) { setupPicker(); map.invalidateSize() }
+})
 
 watch(() => props.pickerPoints, () => { if (map) drawPickerPreview() }, { deep: true })
 
