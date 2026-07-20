@@ -25,7 +25,7 @@
       </div>
     </div>
 
-    <div class="flex gap-4">
+    <div class="flex gap-4 items-start">
       <div class="flex-1 min-w-0">
         <div class="rounded-xl border bg-white overflow-hidden" style="height: 600px;">
           <FloorplanMap
