@@ -46,11 +46,11 @@
       </div>
 
       <div class="w-72 shrink-0 space-y-4">
-        <div v-if="pickerMode" class="rounded-lg border bg-white p-4">
-          <div class="text-sm font-medium text-gray-700 mb-1">Bounds Picker</div>
-          <p class="text-xs text-gray-500 mb-2">Click two points on the map to define room bounds.</p>
-          <button v-if="pickerPoints.length" class="text-xs text-red-500 hover:underline" @click="pickerPoints = []">Clear points</button>
-        </div>
+        <BoundsPicker
+          v-if="pickerMode"
+          :points="pickerPoints"
+          @clear-points="pickerPoints = []"
+        />
 
         <template v-if="!pickerMode">
           <div class="rounded-lg border bg-white">
@@ -112,6 +112,7 @@ import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { apiGet } from '@/composables/api'
 import FloorplanMap from '@/components/FloorplanMap.vue'
+import BoundsPicker from '@/components/BoundsPicker.vue'
 
 const route = useRoute()
 const plan = ref<any>({})

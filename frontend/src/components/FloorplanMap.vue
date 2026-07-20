@@ -37,6 +37,16 @@ const statusColors: Record<string, string> = {
   Retired: '#F44336',
 }
 
+function getDeviceIcon(status: string) {
+  const color = statusColors[status] || '#9E9E9E'
+  return L.divIcon({
+    className: 'custom-marker',
+    html: `<div style="width:20px;height:20px;background:${color};border:2px solid white;border-radius:4px;box-shadow:0 1px 4px rgba(0,0,0,0.4)"></div>`,
+    iconSize: [20, 20],
+    iconAnchor: [10, 10],
+  })
+}
+
 function initMap() {
   if (!mapContainer.value || !props.floorplan) return
   if (map) { map.remove(); map = null }
@@ -55,10 +65,6 @@ function initMap() {
   const imageBounds: L.LatLngBoundsExpression = [[0, 0], [imgH, imgW]]
   L.imageOverlay(props.floorplan.image, imageBounds, { zIndex: 1 }).addTo(map)
   map.fitBounds(imageBounds)
-
-  const markersPane = map.createPane('markers')
-  markersPane.style.zIndex = 700
-  markersPane.style.pointerEvents = 'auto'
 
   roomsLayer = L.layerGroup().addTo(map)
   markersLayer = L.layerGroup().addTo(map)
@@ -88,7 +94,7 @@ function drawPickerPreview() {
 
   for (const pt of props.pickerPoints) {
     const marker = L.circleMarker([pt.y, pt.x], {
-      pane: 'markers', radius: 6, color: '#D32F2F', fillColor: '#F44336', fillOpacity: 0.8, weight: 2,
+      radius: 6, color: '#D32F2F', fillColor: '#F44336', fillOpacity: 0.8, weight: 2,
     })
     marker.bindTooltip(`[${pt.y}, ${pt.x}]`, { permanent: true, direction: 'top', offset: [0, -8] })
     pickerLayer.addLayer(marker)
@@ -161,16 +167,13 @@ function drawMarkers() {
         y = top + padding + row * 40
       }
 
-      const color = statusColors[d.status] || '#9E9E9E'
-      const marker = L.circleMarker([y, x], {
-        pane: 'markers', radius: 7, color: '#fff', weight: 2, fillColor: color, fillOpacity: 0.9,
-      })
+      const marker = L.marker([y, x], { icon: getDeviceIcon(d.status) })
       marker.bindTooltip(d.device_name || d.device_id, { direction: 'top' })
       marker.bindPopup(`
         <div style="font-family:Arial,sans-serif;min-width:160px">
           <div style="font-weight:bold;font-size:13px;margin-bottom:4px">${d.device_name || d.device_id}</div>
           <div style="font-size:11px;color:#666;margin-bottom:6px">${d.device_inventory_code || ''} &mdash; ${d.device_group || ''}</div>
-          <div style="font-size:11px;color:#444"><b>Status:</b> <span style="color:${color}">${d.status}</span></div>
+          <div style="font-size:11px;color:#444"><b>Status:</b> <span style="color:${statusColors[d.status] || '#9E9E9E'}">${d.status}</span></div>
           <div style="margin-top:6px"><a href="/devices/${d.device_id}" style="color:#1565C0;font-size:11px;text-decoration:none">View Details &rarr;</a></div>
         </div>
       `, { maxWidth: 250 })
@@ -179,7 +182,7 @@ function drawMarkers() {
 
       if (props.highlightAssetId && d.device_id === props.highlightAssetId) {
         const pulseRing = L.circleMarker([y, x], {
-          pane: 'markers', radius: 18, color: '#D32F2F', fillColor: '#F44336', fillOpacity: 0.2, weight: 3,
+          radius: 18, color: '#D32F2F', fillColor: '#F44336', fillOpacity: 0.2, weight: 3,
         })
         markersLayer!.addLayer(pulseRing)
       }
