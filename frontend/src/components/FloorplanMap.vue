@@ -75,15 +75,14 @@ function initMap() {
 }
 
 function setupPicker() {
-  if (clickHandler) { map?.off('click', clickHandler); clickHandler = null }
-  if (props.pickerMode) {
-    clickHandler = (e: L.LeafletMouseEvent) => {
-      const y = Math.round(e.latlng.lat)
-      const x = Math.round(e.latlng.lng)
-      emit('map-click', { x, y })
-    }
-    map?.on('click', clickHandler)
+  if (clickHandler) return
+  clickHandler = (e: L.LeafletMouseEvent) => {
+    if (!props.pickerMode) return
+    const y = Math.round(e.latlng.lat)
+    const x = Math.round(e.latlng.lng)
+    emit('map-click', { x, y })
   }
+  map?.on('click', clickHandler)
 }
 
 function drawPickerPreview() {
@@ -198,10 +197,6 @@ watch(() => props.floorplan, () => { initMap() }, { deep: true })
 watch(() => props.assets, () => {
   if (map) { drawRooms(); drawMarkers() }
 }, { deep: true })
-
-watch(() => props.pickerMode, () => {
-  if (map) setupPicker()
-})
 
 watch(() => props.pickerPoints, () => { if (map) drawPickerPreview() }, { deep: true })
 
