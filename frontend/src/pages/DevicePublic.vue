@@ -52,7 +52,7 @@
 
         <div class="bg-white rounded-xl px-4 py-3 shadow-sm border">
           <div class="text-xs font-medium text-gray-400 uppercase tracking-wider mb-2">Location</div>
-          <div class="text-sm text-gray-900">{{ device.location || 'Not assigned' }}</div>
+          <div class="text-sm text-gray-900">{{ device.location_display || device.location || 'Not assigned' }}</div>
         </div>
 
         <div v-if="device.is_computer" class="bg-white rounded-xl px-4 py-3 shadow-sm border">

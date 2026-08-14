@@ -1,6 +1,48 @@
 import frappe
 
 
+def _enrich_location_display(rows: list) -> list:
+    locations = {r.get("location") for r in rows if r.get("location")}
+    loc_names = {}
+    if locations:
+        for loc in frappe.db.get_all(
+            "Location", {"name": ["in", list(locations)]}, ["name", "location_name"]
+        ):
+            loc_names[loc.name] = loc.location_name
+
+    rooms = {r.get("room") for r in rows if r.get("room")}
+    room_map = {}
+    if rooms:
+        for room in frappe.db.get_all(
+            "Room", {"name": ["in", list(rooms)]}, ["name", "room_name", "floorplan"]
+        ):
+            room_map[room.name] = room
+
+    floorplans = {room.floorplan for room in room_map.values() if room.floorplan}
+    fp_titles = {}
+    if floorplans:
+        for fp in frappe.db.get_all(
+            "Floorplan", {"name": ["in", list(floorplans)]}, ["name", "title"]
+        ):
+            fp_titles[fp.name] = fp.title
+
+    for row in rows:
+        if row.get("location"):
+            row["location_display"] = loc_names.get(row["location"]) or row["location"]
+        elif row.get("room"):
+            room = room_map.get(row["room"])
+            if not room:
+                row["location_display"] = ""
+                continue
+            fp_title = fp_titles.get(room.floorplan)
+            row["location_display"] = (
+                f"{room.room_name} · {fp_title}" if fp_title else room.room_name
+            )
+        else:
+            row["location_display"] = ""
+    return rows
+
+
 @frappe.whitelist()
 def get_csrf_token() -> str:
     return frappe.sessions.get_csrf_token()
@@ -28,6 +70,8 @@ def get_device_public_info(name: str) -> dict:
         "is_computer": device.is_computer,
         "parent_device": device.parent_device,
     }
+    display_rows = _enrich_location_display([{"location": device.location, "room": device.room}])
+    result["location_display"] = display_rows[0]["location_display"]
     if device.is_computer:
         result["group_members"] = frappe.get_all(
             "Device Group Member",
@@ -62,7 +106,7 @@ def get_devices(
     devices = frappe.db.sql(
         f"""
         SELECT name, device_inventory_code, device_id, device_name, device_group,
-               status, location, company, device_serial, is_computer, parent_device
+               status, location, room, company, device_serial, is_computer, parent_device
         FROM `tabDevice`
         WHERE 1=1 {conditions}
         ORDER BY modified DESC
@@ -71,6 +115,7 @@ def get_devices(
         as_dict=True,
     )
 
+    _enrich_location_display(devices)
     total = frappe.db.count("Device", filters_dict)
     return {"data": devices, "total": total}
 
@@ -90,12 +135,14 @@ def get_device_detail(name: str) -> dict:
             filters={"parent": name},
             fields=["device", "role", "attached_on", "notes"],
         )
-    return {
+    result = {
         "device": device.as_dict(),
         "attachments": attachments,
         "group_members": group_members,
     }
-
+    display_rows = _enrich_location_display([{"location": device.location, "room": device.room}])
+    result["device"]["location_display"] = display_rows[0]["location_display"]
+    return result
 
 @frappe.whitelist()
 def get_computers(
@@ -310,13 +357,15 @@ def create_inventory_check(
 
     devices = frappe.db.sql(
         f"""
-        SELECT name, device_name, device_inventory_code, device_group, location
+        SELECT name, device_name, device_inventory_code, device_group, location, room
         FROM `tabDevice`
         WHERE {conditions}
         ORDER BY name ASC
         """,
         as_dict=True,
     )
+
+    _enrich_location_display(devices)
 
     doc = frappe.get_doc({
         "doctype": "Inventory Check",
@@ -333,7 +382,7 @@ def create_inventory_check(
                 "device_name": d.device_name,
                 "device_inventory_code": d.device_inventory_code,
                 "device_group": d.device_group,
-                "location": d.location,
+                "location": d.location_display,
             }
             for d in devices
         ],

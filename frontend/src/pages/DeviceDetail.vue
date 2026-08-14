@@ -44,7 +44,7 @@
             <div class="flex justify-between py-1 border-b"><dt class="text-gray-600">ID</dt><dd>{{ detail.data.value.device.device_id }}</dd></div>
             <div class="flex justify-between py-1 border-b"><dt class="text-gray-600">Group</dt><dd>{{ detail.data.value.device.device_group }}</dd></div>
             <div class="flex justify-between py-1 border-b"><dt class="text-gray-600">Serial</dt><dd>{{ detail.data.value.device.device_serial || '-' }}</dd></div>
-            <div class="flex justify-between py-1 border-b"><dt class="text-gray-600">Location</dt><dd>{{ detail.data.value.device.location || '-' }}</dd></div>
+            <div class="flex justify-between py-1 border-b"><dt class="text-gray-600">Location</dt><dd>{{ detail.data.value.device.location_display || detail.data.value.device.location || '-' }}</dd></div>
             <div class="flex justify-between py-1 border-b"><dt class="text-gray-600">Company</dt><dd>{{ detail.data.value.device.company || '-' }}</dd></div>
             <div class="flex justify-between py-1 border-b"><dt class="text-gray-600">Group Leader</dt><dd>
               <span v-if="detail.data.value.device.is_computer" class="px-2 py-0.5 text-xs rounded-full bg-cyan-100 text-cyan-700">Yes</span>

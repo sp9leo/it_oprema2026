@@ -53,7 +53,7 @@
             <td class="px-4 py-2.5">{{ d.device_name || d.device_id }}</td>
             <td class="px-4 py-2.5">{{ d.device_group }}</td>
             <td class="px-4 py-2.5">{{ d.status }}</td>
-            <td class="px-4 py-2.5">{{ d.location }}</td>
+            <td class="px-4 py-2.5">{{ d.location_display || d.location || '-' }}</td>
             <td class="px-4 py-2.5">
               <span v-if="d.is_computer" class="px-2 py-0.5 text-xs rounded-full bg-cyan-100 text-cyan-700">Group Leader</span>
               <span v-else-if="d.parent_device" class="px-2 py-0.5 text-xs rounded-full bg-orange-100 text-orange-700">Member</span>
