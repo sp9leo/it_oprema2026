@@ -478,6 +478,28 @@ def update_device_floorplan(name: str, room: str | None = None, map_x: int | Non
     return {"ok": True}
 
 
+@frappe.whitelist()
+def backfill_device_positions(floorplan: str) -> dict:
+    rooms = frappe.db.get_all("Room", {"floorplan": floorplan}, pluck="name")
+    if not rooms:
+        return {"ok": True, "placed": 0}
+    placeholders = ", ".join(["%s"] * len(rooms))
+    devices = frappe.db.sql(
+        f"""
+        SELECT name FROM `tabDevice`
+        WHERE room IN ({placeholders})
+          AND (map_x IS NULL OR map_y IS NULL)
+        """,
+        tuple(rooms),
+        as_dict=True,
+    )
+    placed = 0
+    for d in devices:
+        frappe.get_doc("Device", d.name).save(ignore_permissions=True)
+        placed += 1
+    return {"ok": True, "placed": placed}
+
+
 # --- Maintenance ---
 
 MAINTENANCE_STATUSES = [

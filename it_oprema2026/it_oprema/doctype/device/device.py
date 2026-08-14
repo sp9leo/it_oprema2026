@@ -6,6 +6,53 @@ class Device(Document):
     def validate(self):
         self.validate_group_consistency()
         self.update_member_parent_references()
+        self.auto_place_on_room()
+
+    def auto_place_on_room(self):
+        prev_room = None
+        if self.get("name"):
+            prev_room = frappe.db.get_value("Device", self.name, "room")
+
+        if not self.room:
+            if prev_room:
+                self.map_x = None
+                self.map_y = None
+            return
+
+        if prev_room != self.room:
+            self.map_x = None
+            self.map_y = None
+
+        if self.map_x is not None and self.map_y is not None:
+            return
+
+        room = frappe.db.get_value(
+            "Room",
+            self.room,
+            ["bounds_top", "bounds_left", "bounds_bottom", "bounds_right"],
+            as_dict=True,
+        )
+        if not room:
+            return
+        top, left = room.bounds_top, room.bounds_left
+        bottom, right = room.bounds_bottom, room.bounds_right
+        if None in (top, left, bottom, right):
+            return
+        room_w = int(right) - int(left)
+        room_h = int(bottom) - int(top)
+        if room_w <= 0 or room_h <= 0:
+            return
+
+        idx = frappe.db.count("Device", filters={"room": self.room})
+        if self.get("name") and prev_room == self.room:
+            idx = max(0, idx - 1)
+
+        padding = 20
+        cols = max(1, room_w // 50)
+        col = idx % cols
+        row = idx // cols
+        self.map_x = int(left + padding + col * 50)
+        self.map_y = int(top + padding + row * 40)
 
     def validate_group_consistency(self):
         if self.is_computer and self.parent_device:

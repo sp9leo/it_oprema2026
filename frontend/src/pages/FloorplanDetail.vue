@@ -204,6 +204,7 @@ watch(() => route.params.id, () => { selectedRoom.value = null; loadPlan() })
 async function loadPlan() {
   loading.value = true
   const id = route.params.id as string
+  await apiPost('/api/method/it_oprema2026.api.frontend.backfill_device_positions', { floorplan: id }).catch(() => {})
   const data = await apiGet('/api/method/it_oprema2026.api.frontend.get_floorplan_detail', { name: id })
   plan.value = data || {}
   loading.value = false
