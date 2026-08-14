@@ -55,16 +55,42 @@ export async function apiGet<T = any>(url: string, params?: Record<string, any>)
   }
 }
 
-export async function apiPost<T = any>(url: string, body: Record<string, any>): Promise<T | null> {
+let csrfToken: string | null = null
+
+async function getCsrfToken(): Promise<string | null> {
+  if (csrfToken) return csrfToken
   try {
-    const res = await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body),
-    })
+    const res = await fetch('/api/method/it_oprema2026.api.frontend.get_csrf_token')
     const json = await res.json()
-    return (json.message ?? json) as T
+    csrfToken = (json.message ?? null) as string | null
   } catch {
-    return null
+    csrfToken = null
   }
+  return csrfToken
+}
+
+export async function apiPost<T = any>(url: string, body: Record<string, any>): Promise<T | null> {
+  const doPost = async (): Promise<T | null> => {
+    const token = await getCsrfToken()
+    const headers: Record<string, string> = { 'Content-Type': 'application/json' }
+    if (token) headers['X-Frappe-CSRF-Token'] = token
+    try {
+      const res = await fetch(url, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(body),
+      })
+      const json = await res.json()
+      return (json.message ?? json) as T
+    } catch {
+      return null
+    }
+  }
+
+  const result = await doPost()
+  if (result && (result as any).exc_type === 'CSRFTokenError') {
+    csrfToken = null
+    return doPost()
+  }
+  return result
 }

@@ -1,6 +1,11 @@
 import frappe
 
 
+@frappe.whitelist()
+def get_csrf_token() -> str:
+    return frappe.sessions.get_csrf_token()
+
+
 @frappe.whitelist(allow_guest=True)
 def ping() -> dict:
     return {"message": "pong"}
