@@ -56,7 +56,14 @@
         </div>
 
         <button
-          class="w-full text-xs px-3 py-1.5 rounded-lg bg-green-600 text-white hover:bg-green-700 transition-colors"
+          :disabled="!roomName.trim()"
+          class="w-full text-xs px-3 py-1.5 rounded-lg bg-green-600 text-white hover:bg-green-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+          @click="emit('create-room', { roomName: roomName.trim(), bounds })">
+          Save Room
+        </button>
+
+        <button
+          class="w-full text-xs px-3 py-1.5 rounded-lg border border-green-600 text-green-700 hover:bg-green-50 transition-colors"
           @click="copyJson">
           {{ copied ? 'Copied!' : 'Copy JSON' }}
         </button>
@@ -72,20 +79,24 @@ const props = defineProps({
   points: { type: Array, default: () => [] },
 })
 
-const emit = defineEmits(['clear-points'])
+const emit = defineEmits(['clear-points', 'create-room'])
 
 const roomName = ref('')
 const copied = ref(false)
 
-const jsonOutput = computed(() => {
-  if (props.points.length !== 2) return ''
+const bounds = computed(() => {
+  if (props.points.length !== 2) return null
   const p1 = props.points[0]
   const p2 = props.points[1]
-  const bounds = [
+  return [
     [Math.min(p1.y, p2.y), Math.min(p1.x, p2.x)],
     [Math.max(p1.y, p2.y), Math.max(p1.x, p2.x)],
   ]
-  return JSON.stringify(bounds)
+})
+
+const jsonOutput = computed(() => {
+  if (!bounds.value) return ''
+  return JSON.stringify(bounds.value)
 })
 
 async function copyJson() {

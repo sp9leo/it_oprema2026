@@ -50,6 +50,7 @@
           v-if="pickerMode"
           :points="pickerPoints"
           @clear-points="pickerPoints = []"
+          @create-room="onCreateRoom"
         />
 
         <template v-if="!pickerMode">
@@ -110,7 +111,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
-import { apiGet } from '@/composables/api'
+import { apiGet, apiPost } from '@/composables/api'
 import FloorplanMap from '@/components/FloorplanMap.vue'
 import BoundsPicker from '@/components/BoundsPicker.vue'
 
@@ -169,6 +170,27 @@ function onMapClick(point: { x: number; y: number }) {
   if (!pickerMode.value) return
   if (pickerPoints.value.length >= 2) pickerPoints.value = []
   pickerPoints.value.push(point)
+}
+
+async function onCreateRoom(payload: { roomName: string; bounds: number[][] }) {
+  const [topLeft, bottomRight] = payload.bounds
+  const result = await apiPost('/api/method/it_oprema2026.api.frontend.create_room', {
+    floorplan: plan.value.name,
+    room_name: payload.roomName,
+    bounds_top: Math.round(topLeft[0]),
+    bounds_left: Math.round(topLeft[1]),
+    bounds_bottom: Math.round(bottomRight[0]),
+    bounds_right: Math.round(bottomRight[1]),
+  })
+  if (result?.ok) {
+    pickerMode.value = false
+    pickerPoints.value = []
+    await loadPlan()
+    const created = plan.value.rooms.find((r: any) => r.room_name === payload.roomName)
+    if (created) selectedRoom.value = created
+  } else {
+    alert(result?.message || 'Failed to create room.')
+  }
 }
 
 function onRoomClick(room: any) {

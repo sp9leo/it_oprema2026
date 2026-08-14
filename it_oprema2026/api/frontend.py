@@ -490,6 +490,49 @@ def get_device_audit_log(device: str) -> list:
 
 # --- Floorplans ---
 
+ROOM_COLORS = [
+    "#3b82f6",
+    "#10b981",
+    "#f59e0b",
+    "#ef4444",
+    "#8b5cf6",
+    "#06b6d4",
+    "#ec4899",
+    "#84cc16",
+]
+
+
+@frappe.whitelist()
+def create_room(
+    floorplan: str,
+    room_name: str,
+    bounds_top: int,
+    bounds_left: int,
+    bounds_bottom: int,
+    bounds_right: int,
+    color: str = "",
+) -> dict:
+    if frappe.db.exists("Room", {"floorplan": floorplan, "room_name": room_name}):
+        return {"ok": False, "message": "A room with this name already exists on this floorplan."}
+    if not color:
+        used = {
+            r[0]
+            for r in frappe.db.get_values("Room", {"floorplan": floorplan}, "color")
+        }
+        color = next((c for c in ROOM_COLORS if c not in used), ROOM_COLORS[0])
+    doc = frappe.get_doc({
+        "doctype": "Room",
+        "room_name": room_name,
+        "floorplan": floorplan,
+        "bounds_top": int(bounds_top),
+        "bounds_left": int(bounds_left),
+        "bounds_bottom": int(bounds_bottom),
+        "bounds_right": int(bounds_right),
+        "color": color,
+    }).insert(ignore_permissions=True)
+    return {"ok": True, "room": doc.as_dict()}
+
+
 @frappe.whitelist()
 def get_floorplans() -> list:
     plans = frappe.db.sql(
