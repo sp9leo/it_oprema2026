@@ -1,6 +1,7 @@
 import { createApp } from 'vue'
 import router from './router'
 import App from './App.vue'
+import '@mdi/font/css/materialdesignicons.css'
 import './index.css'
 
 let app = createApp(App)

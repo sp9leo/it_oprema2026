@@ -1,11 +1,7 @@
 ﻿<template>
   <div class="rounded-lg border bg-white">
     <div class="flex items-center gap-2 px-4 py-2 border-b text-sm font-medium text-gray-700">
-      <svg viewBox="0 0 24 24" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2">
-        <circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/>
-        <line x1="12" y1="1" x2="12" y2="4"/><line x1="12" y1="20" x2="12" y2="23"/>
-        <line x1="1" y1="12" x2="4" y2="12"/><line x1="20" y1="12" x2="23" y2="12"/>
-      </svg>
+      <i class="mdi mdi-crosshairs-gps text-base text-gray-500"></i>
       Bounds Picker
     </div>
     <div class="p-4 space-y-3">
@@ -21,20 +17,20 @@
 
       <div class="space-y-2">
         <div class="flex items-center gap-2">
-          <span class="w-4 h-4 rounded-full flex items-center justify-center shrink-0"
-            :class="points.length >= 1 ? 'bg-green-500' : 'bg-gray-300'">
-            <svg v-if="points.length >= 1" viewBox="0 0 24 24" class="w-3 h-3 text-white" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
-          </span>
+          <i
+            class="mdi text-lg shrink-0"
+            :class="points.length >= 1 ? 'mdi-check-circle text-green-500' : 'mdi-checkbox-blank-circle-outline text-gray-300'"
+          ></i>
           <span class="text-xs text-gray-600">
             <strong>Step 1:</strong> Click top-left corner
             <code v-if="points[0]" class="ml-1 text-gray-500">[{{ points[0].y }}, {{ points[0].x }}]</code>
           </span>
         </div>
         <div class="flex items-center gap-2">
-          <span class="w-4 h-4 rounded-full flex items-center justify-center shrink-0"
-            :class="points.length >= 2 ? 'bg-green-500' : 'bg-gray-300'">
-            <svg v-if="points.length >= 2" viewBox="0 0 24 24" class="w-3 h-3 text-white" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
-          </span>
+          <i
+            class="mdi text-lg shrink-0"
+            :class="points.length >= 2 ? 'mdi-check-circle text-green-500' : 'mdi-checkbox-blank-circle-outline text-gray-300'"
+          ></i>
           <span class="text-xs text-gray-600">
             <strong>Step 2:</strong> Click bottom-right corner
             <code v-if="points[1]" class="ml-1 text-gray-500">[{{ points[1].y }}, {{ points[1].x }}]</code>
@@ -43,8 +39,9 @@
       </div>
 
       <button v-if="points.length > 0"
-        class="w-full text-xs px-3 py-1.5 rounded-lg border border-yellow-300 text-yellow-700 hover:bg-yellow-50 transition-colors"
+        class="w-full text-xs px-3 py-1.5 rounded-lg border border-yellow-300 text-yellow-700 hover:bg-yellow-50 transition-colors flex items-center justify-center gap-1"
         @click="emit('clear-points')">
+        <i class="mdi mdi-undo text-sm"></i>
         Reset Points
       </button>
 
@@ -63,8 +60,9 @@
         </button>
 
         <button
-          class="w-full text-xs px-3 py-1.5 rounded-lg border border-green-600 text-green-700 hover:bg-green-50 transition-colors"
+          class="w-full text-xs px-3 py-1.5 rounded-lg border border-green-600 text-green-700 hover:bg-green-50 transition-colors flex items-center justify-center gap-1"
           @click="copyJson">
+          <i class="mdi mdi-content-copy text-sm"></i>
           {{ copied ? 'Copied!' : 'Copy JSON' }}
         </button>
       </template>

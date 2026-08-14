@@ -11,6 +11,7 @@
 import { ref, watch, onMounted, onBeforeUnmount } from 'vue'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
+import { getAssetIcon } from '@/composables/icons'
 
 const props = defineProps({
   floorplan: { type: Object, required: true },
@@ -38,13 +39,15 @@ const statusColors: Record<string, string> = {
   Retired: '#F44336',
 }
 
-function getDeviceIcon(status: string) {
+function getDeviceIcon(status: string, group?: string) {
   const color = statusColors[status] || '#9E9E9E'
+  const icon = getAssetIcon(group || '')
   return L.divIcon({
     className: 'custom-marker',
-    html: `<div style="width:20px;height:20px;background:${color};border:2px solid white;border-radius:4px;box-shadow:0 1px 4px rgba(0,0,0,0.4)"></div>`,
-    iconSize: [20, 20],
-    iconAnchor: [10, 10],
+    html: `<div style="width:26px;height:26px;background:${color};border:2px solid white;border-radius:6px;box-shadow:0 1px 4px rgba(0,0,0,0.4);display:flex;align-items:center;justify-content:center;color:white;font-size:14px;line-height:1"><i class="mdi ${icon}"></i></div>`,
+    iconSize: [26, 26],
+    iconAnchor: [13, 13],
+    popupAnchor: [0, -16],
   })
 }
 
@@ -171,7 +174,7 @@ function drawMarkers() {
         y = top + padding + row * 40
       }
 
-      const marker = L.marker([y, x], { icon: getDeviceIcon(d.status) })
+      const marker = L.marker([y, x], { icon: getDeviceIcon(d.status, d.device_group) })
       marker.bindTooltip(d.device_name || d.device_id, { direction: 'top' })
       marker.bindPopup(`
         <div style="font-family:Arial,sans-serif;min-width:160px">

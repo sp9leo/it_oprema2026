@@ -3,20 +3,25 @@
     <div class="flex items-center justify-between mb-4">
       <div class="flex items-center gap-2">
         <button class="px-3 py-1.5 text-sm border border-gray-300 rounded-lg hover:bg-gray-50" @click="$router.push('/floorplans')">&larr; Back</button>
-        <h2 class="text-xl font-semibold text-gray-800">{{ plan.title || plan.name }}</h2>
+        <div class="flex items-center gap-2">
+          <i class="mdi mdi-office-building text-xl text-gray-400"></i>
+          <h2 class="text-xl font-semibold text-gray-800">{{ plan.title || plan.name }}</h2>
+        </div>
       </div>
       <button
-        class="px-3 py-1.5 text-sm rounded-lg border transition-colors"
+        class="px-3 py-1.5 text-sm rounded-lg border transition-colors flex items-center gap-1.5"
         :class="pickerMode ? 'bg-red-50 border-red-300 text-red-600' : 'border-gray-300 hover:bg-gray-50'"
         @click="togglePickerMode"
       >
+        <i class="mdi text-base" :class="pickerMode ? 'mdi-close' : 'mdi-crosshairs-gps'"></i>
         {{ pickerMode ? 'Exit Picker' : 'Pick Bounds' }}
       </button>
       <button
-        class="px-3 py-1.5 text-sm rounded-lg border transition-colors"
+        class="px-3 py-1.5 text-sm rounded-lg border transition-colors flex items-center gap-1.5"
         :class="placeMode ? 'bg-blue-50 border-blue-300 text-blue-600' : 'border-gray-300 hover:bg-gray-50'"
         @click="togglePlaceMode"
       >
+        <i class="mdi text-base" :class="placeMode ? 'mdi-close' : 'mdi-map-marker'"></i>
         {{ placeMode ? 'Exit Place' : 'Place Device' }}
       </button>
     </div>
@@ -48,7 +53,8 @@
             @marker-click="onMarkerClick"
             @map-click="onMapClick"
           />
-          <div v-else class="flex items-center justify-center h-full text-gray-400 text-sm">
+          <div v-else class="flex flex-col items-center justify-center h-full text-gray-400 text-sm">
+            <i class="mdi mdi-map-outline text-5xl mb-2"></i>
             No floorplan data available
           </div>
         </div>
@@ -90,7 +96,10 @@
 
           <template v-else>
             <div class="rounded-lg border bg-white">
-              <div class="px-4 py-2 border-b text-sm font-medium text-gray-700">Rooms</div>
+              <div class="px-4 py-2 border-b text-sm font-medium text-gray-700 flex items-center gap-2">
+                <i class="mdi mdi-office-building text-base text-gray-400"></i>
+                Rooms
+              </div>
               <div class="divide-y max-h-[400px] overflow-y-auto">
                 <button
                   v-for="room in plan.rooms"
@@ -110,6 +119,7 @@
             <div v-if="selectedRoom" class="rounded-lg border bg-white">
               <div class="px-4 py-2 border-b text-sm font-medium text-gray-700 flex items-center justify-between">
                 <div class="flex items-center gap-2">
+                  <i class="mdi mdi-door-open text-base text-gray-400"></i>
                   <span class="w-3 h-3 rounded shrink-0" :style="{ background: selectedRoom.color }"></span>
                   {{ selectedRoom.room_name }}
                 </div>
@@ -123,7 +133,7 @@
                   @click="$router.push('/devices/' + d.device_id)"
                 >
                   <div class="flex items-center gap-2">
-                    <span class="w-2.5 h-2.5 rounded-full shrink-0" :style="{ background: statusColors[d.status] || '#9E9E9E' }"></span>
+                    <i class="mdi text-lg shrink-0" :style="{ color: statusColors[d.status] || '#9E9E9E' }" :class="getAssetIcon(d.device_group)"></i>
                     <div class="flex-1 min-w-0">
                       <div class="text-sm font-medium text-gray-800 truncate">{{ d.device_name || d.device_id }}</div>
                       <div class="text-xs text-gray-400">{{ d.device_inventory_code }} &middot; {{ d.device_group || '-' }}</div>
@@ -148,6 +158,7 @@
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { apiGet, apiPost } from '@/composables/api'
+import { getAssetIcon } from '@/composables/icons'
 import FloorplanMap from '@/components/FloorplanMap.vue'
 import BoundsPicker from '@/components/BoundsPicker.vue'
 
