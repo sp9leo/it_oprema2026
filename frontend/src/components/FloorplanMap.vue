@@ -65,6 +65,7 @@ function initMap() {
 
   const imageBounds: L.LatLngBoundsExpression = [[0, 0], [imgH, imgW]]
   L.imageOverlay(props.floorplan.image, imageBounds).addTo(map)
+  map.setMinZoom(-10)
   const fitZoom = map.getBoundsZoom(imageBounds)
   map.setMinZoom(Number.isFinite(fitZoom) ? Math.min(-1, fitZoom) : -1)
   map.fitBounds(imageBounds)
