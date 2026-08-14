@@ -61,6 +61,7 @@ function initMap() {
     maxZoom: 3,
     zoomSnap: 0.25,
     attributionControl: false,
+    keyboard: false,
   })
 
   const imageBounds: L.LatLngBoundsExpression = [[0, 0], [imgH, imgW]]
