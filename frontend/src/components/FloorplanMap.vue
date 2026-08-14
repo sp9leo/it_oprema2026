@@ -1,5 +1,5 @@
 ﻿<template>
-  <div class="w-full h-full relative" :class="{ 'cursor-crosshair': pickerMode }">
+  <div class="w-full h-full relative" :class="{ 'cursor-crosshair': pickerMode || (placeMode && placeTargetId) }">
     <div
       ref="mapContainer"
       class="w-full h-full min-h-[500px] bg-gray-200 rounded-xl overflow-hidden"
@@ -18,6 +18,8 @@ const props = defineProps({
   pickerMode: { type: Boolean, default: false },
   pickerPoints: { type: Array, default: () => [] },
   highlightAssetId: { type: String, default: null },
+  placeMode: { type: Boolean, default: false },
+  placeTargetId: { type: String, default: null },
 })
 
 const emit = defineEmits(['room-click', 'marker-click', 'map-click'])
@@ -77,7 +79,7 @@ function initMap() {
 function setupPicker() {
   if (clickHandler) return
   clickHandler = (e: L.LeafletMouseEvent) => {
-    if (!props.pickerMode) return
+    if (!props.pickerMode && !(props.placeMode && props.placeTargetId)) return
     const y = Math.round(e.latlng.lat)
     const x = Math.round(e.latlng.lng)
     emit('map-click', { x, y })
@@ -184,6 +186,13 @@ function drawMarkers() {
         })
         markersLayer!.addLayer(pulseRing)
       }
+
+      if (props.placeTargetId && d.device_id === props.placeTargetId) {
+        const ring = L.circleMarker([y, x], {
+          radius: 14, color: '#1565C0', weight: 2, fillColor: '#1E88E5', fillOpacity: 0.25, dashArray: '4, 3',
+        })
+        markersLayer!.addLayer(ring)
+      }
     })
   }
 }
@@ -192,7 +201,9 @@ function getMap() { return map }
 
 onMounted(() => { initMap() })
 
-watch(() => props.floorplan, () => { initMap() }, { deep: true })
+watch(() => props.floorplan, () => { initMap() })
+
+watch(() => props.placeTargetId, () => { if (map) drawMarkers() })
 
 watch(() => props.assets, () => {
   if (map) { drawRooms(); drawMarkers() }

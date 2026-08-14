@@ -12,6 +12,13 @@
       >
         {{ pickerMode ? 'Exit Picker' : 'Pick Bounds' }}
       </button>
+      <button
+        class="px-3 py-1.5 text-sm rounded-lg border transition-colors"
+        :class="placeMode ? 'bg-blue-50 border-blue-300 text-blue-600' : 'border-gray-300 hover:bg-gray-50'"
+        @click="togglePlaceMode"
+      >
+        {{ placeMode ? 'Exit Place' : 'Place Device' }}
+      </button>
     </div>
 
     <div class="rounded-lg border bg-white px-4 py-3 mb-4">
@@ -35,8 +42,10 @@
             :assets="allDevices"
             :picker-mode="pickerMode"
             :picker-points="pickerPoints"
+            :place-mode="placeMode"
+            :place-target-id="placeTarget?.device_id"
             @room-click="onRoomClick"
-            @marker-click="() => {}"
+            @marker-click="onMarkerClick"
             @map-click="onMapClick"
           />
           <div v-else class="flex items-center justify-center h-full text-gray-400 text-sm">
@@ -54,50 +63,77 @@
         />
 
         <template v-if="!pickerMode">
-          <div class="rounded-lg border bg-white">
-            <div class="px-4 py-2 border-b text-sm font-medium text-gray-700">Rooms</div>
-            <div class="divide-y max-h-[400px] overflow-y-auto">
+          <div v-if="placeMode" class="rounded-lg border bg-white">
+            <div class="px-4 py-2 border-b text-sm font-medium text-gray-700 flex items-center justify-between">
+              <span>Place Device</span>
+              <button class="text-gray-400 hover:text-gray-600 text-sm leading-none" @click="togglePlaceMode">&times;</button>
+            </div>
+            <div class="p-4 space-y-3">
+              <div v-if="placeTarget" class="flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full shrink-0" :style="{ background: statusColors[placeTarget.status] || '#9E9E9E' }"></span>
+                <span class="text-sm font-medium text-gray-800">{{ placeTarget.device_name || placeTarget.device_id }}</span>
+              </div>
+              <p class="text-xs text-gray-500 leading-relaxed">
+                {{ placeTarget
+                  ? 'Now click a position on the map to place this device.'
+                  : 'Click a device marker on the map to select it, then click where it should be placed.' }}
+              </p>
               <button
-                v-for="room in plan.rooms"
-                :key="room.name"
-                class="w-full text-left px-4 py-2 hover:bg-gray-50 transition-colors"
-                @click="onRoomClick(room)"
+                v-if="placeTarget"
+                class="w-full text-xs px-3 py-1.5 rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-50"
+                @click="placeTarget = null"
               >
-                <div class="flex items-center gap-2">
-                  <span class="w-3 h-3 rounded shrink-0" :style="{ background: room.color }"></span>
-                  <span class="text-sm text-gray-700">{{ room.room_name }}</span>
-                </div>
-                <div class="text-xs text-gray-400 ml-5">{{ (room.devices || []).length }} device{{ (room.devices || []).length !== 1 ? 's' : '' }}</div>
+                Cancel Selection
               </button>
             </div>
           </div>
 
-          <div v-if="selectedRoom" class="rounded-lg border bg-white">
-            <div class="px-4 py-2 border-b text-sm font-medium text-gray-700 flex items-center justify-between">
-              <div class="flex items-center gap-2">
-                <span class="w-3 h-3 rounded shrink-0" :style="{ background: selectedRoom.color }"></span>
-                {{ selectedRoom.room_name }}
+          <template v-else>
+            <div class="rounded-lg border bg-white">
+              <div class="px-4 py-2 border-b text-sm font-medium text-gray-700">Rooms</div>
+              <div class="divide-y max-h-[400px] overflow-y-auto">
+                <button
+                  v-for="room in plan.rooms"
+                  :key="room.name"
+                  class="w-full text-left px-4 py-2 hover:bg-gray-50 transition-colors"
+                  @click="onRoomClick(room)"
+                >
+                  <div class="flex items-center gap-2">
+                    <span class="w-3 h-3 rounded shrink-0" :style="{ background: room.color }"></span>
+                    <span class="text-sm text-gray-700">{{ room.room_name }}</span>
+                  </div>
+                  <div class="text-xs text-gray-400 ml-5">{{ (room.devices || []).length }} device{{ (room.devices || []).length !== 1 ? 's' : '' }}</div>
+                </button>
               </div>
-              <button class="text-gray-400 hover:text-gray-600 text-sm leading-none" @click="selectedRoom = null">&times;</button>
             </div>
-            <div v-if="selectedRoomDevices.length" class="divide-y max-h-[350px] overflow-y-auto">
-              <div
-                v-for="d in selectedRoomDevices"
-                :key="d.device_id"
-                class="px-4 py-2 hover:bg-gray-50 cursor-pointer"
-                @click="$router.push('/devices/' + d.device_id)"
-              >
+
+            <div v-if="selectedRoom" class="rounded-lg border bg-white">
+              <div class="px-4 py-2 border-b text-sm font-medium text-gray-700 flex items-center justify-between">
                 <div class="flex items-center gap-2">
-                  <span class="w-2.5 h-2.5 rounded-full shrink-0" :style="{ background: statusColors[d.status] || '#9E9E9E' }"></span>
-                  <div class="flex-1 min-w-0">
-                    <div class="text-sm font-medium text-gray-800 truncate">{{ d.device_name || d.device_id }}</div>
-                    <div class="text-xs text-gray-400">{{ d.device_inventory_code }} &middot; {{ d.device_group || '-' }}</div>
+                  <span class="w-3 h-3 rounded shrink-0" :style="{ background: selectedRoom.color }"></span>
+                  {{ selectedRoom.room_name }}
+                </div>
+                <button class="text-gray-400 hover:text-gray-600 text-sm leading-none" @click="selectedRoom = null">&times;</button>
+              </div>
+              <div v-if="selectedRoomDevices.length" class="divide-y max-h-[350px] overflow-y-auto">
+                <div
+                  v-for="d in selectedRoomDevices"
+                  :key="d.device_id"
+                  class="px-4 py-2 hover:bg-gray-50 cursor-pointer"
+                  @click="$router.push('/devices/' + d.device_id)"
+                >
+                  <div class="flex items-center gap-2">
+                    <span class="w-2.5 h-2.5 rounded-full shrink-0" :style="{ background: statusColors[d.status] || '#9E9E9E' }"></span>
+                    <div class="flex-1 min-w-0">
+                      <div class="text-sm font-medium text-gray-800 truncate">{{ d.device_name || d.device_id }}</div>
+                      <div class="text-xs text-gray-400">{{ d.device_inventory_code }} &middot; {{ d.device_group || '-' }}</div>
+                    </div>
                   </div>
                 </div>
               </div>
+              <div v-else class="p-4 text-sm text-gray-400 text-center">No devices in this room</div>
             </div>
-            <div v-else class="p-4 text-sm text-gray-400 text-center">No devices in this room</div>
-          </div>
+          </template>
         </template>
       </div>
     </div>
@@ -120,6 +156,8 @@ const plan = ref<any>({})
 const loading = ref(true)
 const selectedRoom = ref<any>(null)
 const pickerMode = ref(false)
+const placeMode = ref(false)
+const placeTarget = ref<any>(null)
 const pickerPoints = ref<any[]>([])
 const floorplanRef = ref<InstanceType<typeof FloorplanMap> | null>(null)
 
@@ -162,14 +200,57 @@ async function loadPlan() {
 
 function togglePickerMode() {
   pickerMode.value = !pickerMode.value
-  if (!pickerMode.value) pickerPoints.value = []
+  if (pickerMode.value) {
+    placeMode.value = false
+    placeTarget.value = null
+  } else {
+    pickerPoints.value = []
+  }
   selectedRoom.value = null
 }
 
+function togglePlaceMode() {
+  placeMode.value = !placeMode.value
+  if (placeMode.value) {
+    pickerMode.value = false
+    pickerPoints.value = []
+    selectedRoom.value = null
+  } else {
+    placeTarget.value = null
+  }
+}
+
 function onMapClick(point: { x: number; y: number }) {
+  if (placeMode.value && placeTarget.value) {
+    placeDevice(placeTarget.value, point)
+    return
+  }
   if (!pickerMode.value) return
   if (pickerPoints.value.length >= 2) pickerPoints.value = []
   pickerPoints.value.push(point)
+}
+
+function onMarkerClick(d: any) {
+  if (placeMode.value) placeTarget.value = d
+}
+
+async function placeDevice(device: any, point: { x: number; y: number }) {
+  const result = await apiPost('/api/method/it_oprema2026.api.frontend.update_device_floorplan', {
+    name: device.device_id,
+    map_x: point.x,
+    map_y: point.y,
+  })
+  if (result?.ok) {
+    const room = plan.value.rooms?.find((r: any) => (r.devices || []).some((d: any) => d.device_id === device.device_id))
+    const dev = room?.devices?.find((d: any) => d.device_id === device.device_id)
+    if (dev) {
+      dev.map_x = point.x
+      dev.map_y = point.y
+    }
+    placeTarget.value = null
+  } else {
+    alert(result?.message || 'Failed to place device.')
+  }
 }
 
 async function onCreateRoom(payload: { roomName: string; bounds: number[][] }) {
