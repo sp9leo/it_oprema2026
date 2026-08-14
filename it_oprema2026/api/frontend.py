@@ -480,12 +480,45 @@ def update_device_floorplan(name: str, room: str | None = None, map_x: int | Non
 
 # --- Maintenance ---
 
+MAINTENANCE_STATUSES = [
+    {"value": "Pending", "label": "Pending", "icon": "mdi-clock-outline", "color": "warning"},
+    {"value": "Sent to Repair", "label": "Sent to Repair", "icon": "mdi-send-check", "color": "purple"},
+    {"value": "Parts Ordered", "label": "Parts Ordered", "icon": "mdi-cart-check", "color": "info"},
+    {"value": "Awaiting Parts", "label": "Awaiting Parts", "icon": "mdi-package-variant", "color": "orange"},
+    {"value": "In Progress", "label": "In Progress", "icon": "mdi-tools", "color": "primary"},
+    {"value": "Completed", "label": "Completed", "icon": "mdi-check-circle", "color": "success"},
+]
+
+
+def _set_device_status(device: str, status: str | None) -> None:
+    if not device:
+        return
+    if status and not frappe.db.exists("IT-Status", status):
+        return
+    frappe.db.set_value("Device", device, "status", status)
+
+
+def _apply_status_transition(record, old_status: str, new_status: str) -> None:
+    if new_status == "Completed" and old_status != "Completed":
+        record.completed_date = frappe.utils.today()
+        _set_device_status(record.device, record.previous_device_status or None)
+    elif old_status == "Completed" and new_status != "Completed":
+        record.completed_date = None
+        _set_device_status(record.device, "Maintenance")
+
+
+@frappe.whitelist()
+def get_maintenance_statuses() -> list:
+    return MAINTENANCE_STATUSES
+
+
 @frappe.whitelist()
 def get_maintenance_records(device: str) -> list:
     records = frappe.db.sql(
         """
         SELECT name, device, maintenance_type, description, maintenance_date,
-               scheduled_date, status, performed_by, cost, notes
+               scheduled_date, estimated_return, completed_date, status,
+               performed_by, cost, notes
         FROM `tabMaintenance Record`
         WHERE device = %s
         ORDER BY maintenance_date DESC
@@ -493,6 +526,13 @@ def get_maintenance_records(device: str) -> list:
         device,
         as_dict=True,
     )
+    for record in records:
+        record["updates"] = frappe.db.get_all(
+            "Maintenance Record Update",
+            filters={"parent": record["name"]},
+            fields=["name", "update_date", "user", "note", "status_change"],
+            order_by="update_date ASC",
+        )
     return records
 
 
@@ -503,27 +543,126 @@ def create_maintenance_record(
     description: str = "",
     maintenance_date: str | None = None,
     scheduled_date: str | None = None,
+    estimated_return: str | None = None,
     performed_by: str = "",
     cost: float = 0.0,
     notes: str = "",
+    status: str = "Pending",
 ) -> dict:
+    previous_status = frappe.db.get_value("Device", device, "status")
     doc = frappe.get_doc({
         "doctype": "Maintenance Record",
         "device": device,
         "maintenance_type": maintenance_type,
         "description": description,
-        "maintenance_date": maintenance_date or frappe.utils.now_datetime(),
+        "maintenance_date": maintenance_date or frappe.utils.today(),
         "scheduled_date": scheduled_date,
-        "status": "Completed",
+        "estimated_return": estimated_return,
+        "status": status,
         "performed_by": performed_by,
         "cost": cost,
         "notes": notes,
+        "previous_device_status": previous_status,
     })
     doc.insert(ignore_permissions=True)
+    if status != "Completed":
+        _set_device_status(device, "Maintenance")
     frappe.get_doc("Device", device).add_comment(
         "Info", f"Maintenance record created: {maintenance_type} - {description}"
     )
     return doc.as_dict()
+
+
+@frappe.whitelist()
+def update_maintenance_record(
+    name: str,
+    maintenance_type: str | None = None,
+    description: str | None = None,
+    maintenance_date: str | None = None,
+    scheduled_date: str | None = None,
+    estimated_return: str | None = None,
+    performed_by: str | None = None,
+    cost: float | None = None,
+    notes: str | None = None,
+    status: str | None = None,
+) -> dict:
+    doc = frappe.get_doc("Maintenance Record", name)
+    if maintenance_type is not None:
+        doc.maintenance_type = maintenance_type
+    if description is not None:
+        doc.description = description
+    if maintenance_date is not None:
+        doc.maintenance_date = maintenance_date
+    if scheduled_date is not None:
+        doc.scheduled_date = scheduled_date or None
+    if estimated_return is not None:
+        doc.estimated_return = estimated_return or None
+    if performed_by is not None:
+        doc.performed_by = performed_by
+    if cost is not None:
+        doc.cost = cost
+    if notes is not None:
+        doc.notes = notes
+    old_status = doc.status
+    if status is not None and status != old_status:
+        doc.status = status
+        _apply_status_transition(doc, old_status, status)
+    doc.save(ignore_permissions=True)
+    return doc.as_dict()
+
+
+@frappe.whitelist()
+def complete_maintenance_record(name: str) -> dict:
+    doc = frappe.get_doc("Maintenance Record", name)
+    old_status = doc.status
+    if old_status != "Completed":
+        doc.status = "Completed"
+        _apply_status_transition(doc, old_status, "Completed")
+    doc.save(ignore_permissions=True)
+    return doc.as_dict()
+
+
+@frappe.whitelist()
+def add_maintenance_update(
+    name: str, note: str = "", status_change: str | None = None
+) -> dict:
+    doc = frappe.get_doc("Maintenance Record", name)
+    new_status = None
+    if status_change and "\u2192" in status_change:
+        new_status = status_change.split("\u2192")[-1].strip()
+    doc.append(
+        "updates",
+        {
+            "update_date": frappe.utils.now_datetime(),
+            "user": frappe.utils.get_fullname(frappe.session.user),
+            "note": note,
+            "status_change": status_change or None,
+        },
+    )
+    if new_status and new_status != doc.status:
+        old_status = doc.status
+        doc.status = new_status
+        _apply_status_transition(doc, old_status, new_status)
+    doc.save(ignore_permissions=True)
+    return doc.as_dict()
+
+
+@frappe.whitelist()
+def get_upcoming_maintenance(days: int = 30) -> list:
+    today = frappe.utils.today()
+    end = frappe.utils.add_days(today, int(days))
+    return frappe.db.sql(
+        """
+        SELECT name, device, maintenance_type, maintenance_date, scheduled_date,
+               estimated_return, status, performed_by, notes
+        FROM `tabMaintenance Record`
+        WHERE status != 'Completed'
+          AND maintenance_date BETWEEN %s AND %s
+        ORDER BY maintenance_date ASC
+        """,
+        (today, end),
+        as_dict=True,
+    )
 
 
 # --- Audit Log ---

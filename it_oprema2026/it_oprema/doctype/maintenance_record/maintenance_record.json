@@ -11,13 +11,19 @@
   "column_break_1",
   "maintenance_date",
   "scheduled_date",
+  "estimated_return",
+  "column_break_2",
+  "completed_date",
+  "previous_device_status",
   "section_break_desc",
   "description",
   "column_break_details",
   "status",
   "performed_by",
   "cost",
-  "notes"
+  "notes",
+  "section_break_updates",
+  "updates"
  ],
  "fields": [
   {
@@ -55,6 +61,26 @@
    "label": "Scheduled Date"
   },
   {
+   "fieldname": "estimated_return",
+   "fieldtype": "Date",
+   "label": "Estimated Return"
+  },
+  {
+   "fieldname": "column_break_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "completed_date",
+   "fieldtype": "Date",
+   "label": "Completed Date"
+  },
+  {
+   "fieldname": "previous_device_status",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Previous Device Status"
+  },
+  {
    "fieldname": "section_break_desc",
    "fieldtype": "Section Break"
   },
@@ -69,13 +95,13 @@
    "fieldtype": "Column Break"
   },
   {
-   "default": "Completed",
+   "default": "Pending",
    "fieldname": "status",
    "fieldtype": "Select",
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Status",
-   "options": "Planned\nIn Progress\nCompleted\nCancelled"
+   "options": "Pending\nSent to Repair\nParts Ordered\nAwaiting Parts\nIn Progress\nCompleted"
   },
   {
    "fieldname": "performed_by",
@@ -91,6 +117,16 @@
    "fieldname": "notes",
    "fieldtype": "Text",
    "label": "Notes"
+  },
+  {
+   "fieldname": "section_break_updates",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "updates",
+   "fieldtype": "Table",
+   "label": "Updates",
+   "options": "Maintenance Record Update"
   }
  ],
  "grid_page_length": 50,

@@ -120,11 +120,24 @@
           <h3 class="text-lg font-medium">Maintenance</h3>
         </div>
         <div class="p-4">
-          <MaintenanceLog :device="name" @add="showMaintenanceForm = true" />
+          <MaintenanceLog ref="maintenanceLogRef" :device="name" @add="openAddMaintenance" @edit="openEditMaintenance" @add-update="openUpdateForm" />
         </div>
       </div>
 
-      <MaintenanceForm v-if="showMaintenanceForm" :device="name" @close="showMaintenanceForm = false" @saved="onMaintenanceSaved" />
+      <MaintenanceForm
+        v-if="showMaintenanceForm"
+        :device="name"
+        :record="editingMaintenance"
+        @close="closeMaintenanceForm"
+        @saved="onMaintenanceSaved"
+      />
+
+      <MaintenanceUpdateForm
+        v-if="showUpdateForm"
+        :record="updatingMaintenance"
+        @close="closeUpdateForm"
+        @saved="onUpdateSaved"
+      />
 
       <div class="rounded-lg border bg-white overflow-hidden mb-6">
         <div class="px-4 py-3 border-b flex items-center justify-between">
@@ -198,6 +211,7 @@ import { useFetch, apiPost } from '@/composables/api'
 import QRCodeLabel from '@/components/QRCodeLabel.vue'
 import MaintenanceLog from '@/components/MaintenanceLog.vue'
 import MaintenanceForm from '@/components/MaintenanceForm.vue'
+import MaintenanceUpdateForm from '@/components/MaintenanceUpdateForm.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -206,6 +220,10 @@ const backendUrl = computed(() => `${window.location.protocol}//${window.locatio
 const showQR = ref(false)
 const publicUrl = computed(() => `${window.location.protocol}//${window.location.host}${router.resolve({ name: 'DevicePublic', params: { id: name.value } }).href}`)
 const showMaintenanceForm = ref(false)
+const editingMaintenance = ref<any>(null)
+const showUpdateForm = ref(false)
+const updatingMaintenance = ref<any>(null)
+const maintenanceLogRef = ref<{ refresh: () => Promise<void> } | null>(null)
 const previewPhoto = ref('')
 
 const detail = useFetch<any>('/api/method/it_oprema2026.api.frontend.get_device_detail', { name: name.value })
@@ -265,9 +283,42 @@ async function uploadPhoto(e: Event) {
   input.value = ''
 }
 
+function openAddMaintenance() {
+  editingMaintenance.value = null
+  showMaintenanceForm.value = true
+}
+
+function openEditMaintenance(record: any) {
+  editingMaintenance.value = { ...record }
+  showMaintenanceForm.value = true
+}
+
+function closeMaintenanceForm() {
+  showMaintenanceForm.value = false
+  editingMaintenance.value = null
+}
+
 async function onMaintenanceSaved() {
   showMaintenanceForm.value = false
+  editingMaintenance.value = null
   detail.fetch({ name: name.value })
+  await maintenanceLogRef.value?.refresh()
+}
+
+function openUpdateForm(record: any) {
+  updatingMaintenance.value = record
+  showUpdateForm.value = true
+}
+
+function closeUpdateForm() {
+  showUpdateForm.value = false
+  updatingMaintenance.value = null
+}
+
+async function onUpdateSaved() {
+  showUpdateForm.value = false
+  updatingMaintenance.value = null
+  await maintenanceLogRef.value?.refresh()
 }
 
 async function copyLink() {
