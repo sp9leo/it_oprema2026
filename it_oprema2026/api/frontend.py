@@ -188,7 +188,7 @@ def get_locations() -> list:
 def get_device_groups() -> list:
     return frappe.db.sql(
         """
-        SELECT name, device_group_name, is_computer
+        SELECT name, title AS device_group_name, is_group
         FROM `tabDevice Group`
         ORDER BY name ASC
         """,

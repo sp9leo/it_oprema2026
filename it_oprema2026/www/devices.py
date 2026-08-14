@@ -8,4 +8,4 @@ def get_context(context):
     )
     for d in context.devices:
         d.manufacturer_name = frappe.db.get_value("IT-Device Manufacturer", d.device_manufacturer, "manufacturer_name") if d.device_manufacturer else ""
-        d.group_name = frappe.db.get_value("Device Group", d.device_group, "device_group_name") if d.device_group else ""
+        d.group_name = frappe.db.get_value("Device Group", d.device_group, "title") if d.device_group else ""
