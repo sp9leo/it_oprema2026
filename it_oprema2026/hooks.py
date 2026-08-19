@@ -10,16 +10,6 @@ use_json_request_body = True
 app_include_js = "/assets/it_oprema2026/js/it_oprema.js"
 app_include_icons = "/assets/it_oprema2026/icons/icons.svg"
 
-add_to_apps_screen = [
-    {
-        "name": "it_oprema2026",
-        "logo": "/assets/it_oprema2026/images/logo.svg",
-        "title": "IT Oprema 2026",
-        "route": "/app/reservations",
-        "has_permission": "it_oprema2026.api.permission.has_app_permission",
-    }
-]
-
 scheduler_events = {
     "daily": [
         "it_oprema2026.device_loan.api.expire_stale_tokens"
