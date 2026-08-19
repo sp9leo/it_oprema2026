@@ -1,0 +1,14 @@
+{
+ "app_name": "it_oprema2026",
+ "docs": [
+  {
+   "doctype": "Device Loan",
+   "name": "Device Loan"
+  }
+ ],
+ "label": "Device Loan",
+ "name": "Device Loan",
+ "package_name": "it_oprema2026",
+ "restricted_to_user": null,
+ "version": 1
+}

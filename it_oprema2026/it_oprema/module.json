@@ -1,0 +1,106 @@
+{
+ "app_name": "it_oprema2026",
+ "docs": [
+  {
+   "doctype": "Bookable Items",
+   "name": "Bookable Items"
+  },
+  {
+   "doctype": "Device",
+   "name": "Device"
+  },
+  {
+   "doctype": "Device Group",
+   "name": "Device Group"
+  },
+  {
+   "doctype": "Device Group Member",
+   "name": "Device Group Member"
+  },
+  {
+   "doctype": "Device IP Link",
+   "name": "Device IP Link"
+  },
+  {
+   "doctype": "Device Location Log",
+   "name": "Device Location Log"
+  },
+  {
+   "doctype": "Device Movement",
+   "name": "Device Movement"
+  },
+  {
+   "doctype": "Device Movement Item",
+   "name": "Device Movement Item"
+  },
+  {
+   "doctype": "Dogodki",
+   "name": "Dogodki"
+  },
+  {
+   "doctype": "Enota",
+   "name": "Enota"
+  },
+  {
+   "doctype": "Floorplan",
+   "name": "Floorplan"
+  },
+  {
+   "doctype": "Floorplan Room",
+   "name": "Floorplan Room"
+  },
+  {
+   "doctype": "Inventory Check",
+   "name": "Inventory Check"
+  },
+  {
+   "doctype": "Inventory Check Item",
+   "name": "Inventory Check Item"
+  },
+  {
+   "doctype": "IP Address",
+   "name": "IP Address"
+  },
+  {
+   "doctype": "IT-Device Manufacturer",
+   "name": "IT-Device Manufacturer"
+  },
+  {
+   "doctype": "IT-Manufacturer",
+   "name": "IT-Manufacturer"
+  },
+  {
+   "doctype": "IT-Status",
+   "name": "IT-Status"
+  },
+  {
+   "doctype": "Linked Location",
+   "name": "Linked Location"
+  },
+  {
+   "doctype": "Location",
+   "name": "Location"
+  },
+  {
+   "doctype": "Maintenance Record",
+   "name": "Maintenance Record"
+  },
+  {
+   "doctype": "Maintenance Record Update",
+   "name": "Maintenance Record Update"
+  },
+  {
+   "doctype": "Network",
+   "name": "Network"
+  },
+  {
+   "doctype": "Room",
+   "name": "Room"
+  }
+ ],
+ "label": "IT Oprema",
+ "name": "IT Oprema",
+ "package_name": "it_oprema2026",
+ "restricted_to_user": null,
+ "version": 1
+}
