@@ -8,3 +8,7 @@ node_modules/
 .DS_Store
 *.swp
 *.swo
+
+# Raw GLPI asset exports: real inventory, serial numbers and user data.
+GLPI\ export/*.csv
+GLPI\ export/import/*.csv
