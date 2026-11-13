@@ -14,7 +14,9 @@
    "column_break_xvhb",
    "device_name",
    "device_manufacturer",
+   "device_model",
    "device_manufacturer_model",
+   "device_os",
    "device_serial",
    "column_break_ypaf",
     "device_group",
@@ -323,11 +325,21 @@
    "options": "IT-Device Manufacturer"
   },
   {
-   "fetch_from": "link_yzwv.manufacturer_part_no",
+   "fieldname": "device_model",
+   "fieldtype": "Data",
+   "label": "Model"
+  },
+  {
+   "fetch_from": "device_manufacturer.manufacturer_part_no",
    "fieldname": "device_manufacturer_model",
    "fieldtype": "Data",
    "label": "Model/oznaka proizvajalca",
    "read_only": 1
+  },
+  {
+   "fieldname": "device_os",
+   "fieldtype": "Data",
+   "label": "Operacijski sistem"
   },
   {
    "fieldname": "attached_ips_html",
@@ -358,7 +370,7 @@
      "link_fieldname": "device_link"
     }
    ],
- "modified": "2025-12-16 09:28:06.317704",
+ "modified": "2026-11-13 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "IT_Oprema",
  "name": "Device",
