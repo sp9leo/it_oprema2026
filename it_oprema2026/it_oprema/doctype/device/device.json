@@ -1,5 +1,6 @@
 {
  "actions": [],
+ "allow_import": 1,
  "allow_rename": 1,
  "autoname": "DEV.###",
  "creation": "2023-10-17 14:13:16.608421",
@@ -370,7 +371,7 @@
      "link_fieldname": "device_link"
     }
    ],
- "modified": "2026-11-13 12:00:00.000000",
+ "modified": "2026-11-13 13:00:00.000000",
  "modified_by": "Administrator",
  "module": "IT_Oprema",
  "name": "Device",
