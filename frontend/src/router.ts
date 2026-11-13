@@ -86,14 +86,13 @@ const routes = [
   },
   {
     path: '/:pathMatch(.*)*',
-    redirect: (to) => {
-      window.location.href = `//${window.location.hostname}:8000${to.fullPath}`
-    },
+    redirect: { name: 'Home' },
   },
 ]
 
 let router = createRouter({
-  history: createWebHistory('/it_oprema2026'),
+  // Matches vite `base` (VITE_BASE_PATH, default "/").
+  history: createWebHistory(import.meta.env.BASE_URL),
   routes,
 })
 

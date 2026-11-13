@@ -1,0 +1,21 @@
+name: it-oprema2026-frontend
+
+services:
+  it-oprema-web:
+    build:
+      context: .
+      args:
+        # "/" for standalone nginx; "/it_oprema2026/" if this bundle is mounted under Frappe.
+        VITE_BASE_PATH: ${VITE_BASE_PATH:-/}
+        # Backend origin for "Open in Desk" links. Empty = legacy "<host>:8000" fallback.
+        VITE_FRAPPE_URL: ${VITE_FRAPPE_URL:-}
+    container_name: it-oprema-web
+    restart: unless-stopped
+    ports:
+      - "${WEB_PORT:-8080}:80"
+    environment:
+      # Backend base URL for /api, /files and /private. Override with a .env file or the shell.
+      API_PROXY_TARGET: ${API_PROXY_TARGET:-https://muri.osaz.si}
+      # Host header sent upstream. Must match a site configured in the bench, or the
+      # backend answers 404 because it routes by Host. Keep in sync with the target.
+      API_PROXY_HOST: ${API_PROXY_HOST:-muri.osaz.si}

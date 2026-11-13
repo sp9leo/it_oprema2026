@@ -96,6 +96,7 @@
 import { ref, computed, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { apiGet } from '@/composables/api'
+import { deskUrl } from '@/data/config'
 
 const route = useRoute()
 const device = ref<any>(null)
@@ -103,7 +104,7 @@ const loading = ref(true)
 const error = ref(false)
 const deviceId = computed(() => route.params.id as string)
 
-const editUrl = computed(() => `${window.location.protocol}//${window.location.hostname}:8000/app/device/${device.value?.name}`)
+const editUrl = computed(() => deskUrl(`/app/device/${device.value?.name}`))
 
 const statusBadgeClass = computed(() => {
   const map: Record<string, string> = {

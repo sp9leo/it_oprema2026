@@ -212,11 +212,12 @@ import QRCodeLabel from '@/components/QRCodeLabel.vue'
 import MaintenanceLog from '@/components/MaintenanceLog.vue'
 import MaintenanceForm from '@/components/MaintenanceForm.vue'
 import MaintenanceUpdateForm from '@/components/MaintenanceUpdateForm.vue'
+import { deskUrl } from '@/data/config'
 
 const route = useRoute()
 const router = useRouter()
 const name = computed(() => route.params.id as string)
-const backendUrl = computed(() => `${window.location.protocol}//${window.location.hostname}:8000/app/device/${name.value}`)
+const backendUrl = computed(() => deskUrl(`/app/device/${name.value}`))
 const showQR = ref(false)
 const publicUrl = computed(() => `${window.location.protocol}//${window.location.host}${router.resolve({ name: 'DevicePublic', params: { id: name.value } }).href}`)
 const showMaintenanceForm = ref(false)

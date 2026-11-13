@@ -46,10 +46,14 @@ function tryDetectSite() {
 function detectProxyTarget() {
   const site = tryDetectSite()
   if (site) return `http://${site}:8000`
-  return process.env.VITE_BACKEND_URL || 'http://192.168.1.111:8000'
+  return process.env.VITE_BACKEND_URL || 'http://muri.osaz.si'
 }
 
 export default defineConfig({
+  // Served standalone (Docker/nginx) at "/"; set VITE_BASE_PATH=/it_oprema2026/
+  // when the bundle is mounted under the Frappe app path instead.
+  base: process.env.VITE_BASE_PATH || '/',
+
   define: {
     __VUE_PROD_HYDRATION_MISMATCH_DETAILS__: 'false',
   },
@@ -61,16 +65,17 @@ export default defineConfig({
       configureServer(server) {
         server.httpServer?.once('listening', () => {
           const site = tryDetectSite()
+          const base = server.config.base
           if (site) {
             const info = server.config.server
             const url = new URL("http://localhost")
             url.hostname = site
             url.port = info.port
-            url.pathname = "/it_oprema2026"
+            url.pathname = base
             console.log("Open in Browser: " + url.href)
           } else {
             const info = server.config.server
-            console.log(`Vite dev server running at http://localhost:${info.port}/it_oprema2026`)
+            console.log(`Vite dev server running at http://localhost:${info.port}${base}`)
           }
         })
       }
